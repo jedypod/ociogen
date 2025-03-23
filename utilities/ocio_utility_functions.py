@@ -179,8 +179,8 @@ def create_ocio_colorspace(c, reference, ocio_version_major, config_dir, LUT_SIZ
 	else:
 		print(f'Warning! No transforms defined for this colorspace, setting {c.name} as the reference space!')
 
-	# Set Encoding
-	if c.encoding != '':
+	# Set Encoding if OCIOv2
+	if c.encoding != '' and ocio_version_major > 1:
 		valid_encodings = ['scene-linear', 'log', 'sdr-video', 'hdr-video', 'data']
 		if c.encoding in valid_encodings:
 			cs.setEncoding(c.encoding)
