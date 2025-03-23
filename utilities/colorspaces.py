@@ -416,7 +416,7 @@ def get_colorspaces(OCIOv):
 	# Display Colorspaces
 	display_referred_colorspaces = [
 		Colorspace(
-			name = 'Rec.709 - Linear',
+			name = 'Rec709 - Linear',
 			alias = 'bt709ln',
 			desc = 'ITU-R Recommendation BT.709 Gamut - Linear',
 			encoding = 'scene-linear',
@@ -424,7 +424,7 @@ def get_colorspaces(OCIOv):
 			chr = [0.64, 0.33, 0.3, 0.6, 0.15, 0.06, 0.3127, 0.329],
 		),
 		Colorspace(
-			name = 'Rec.2020 - Linear',
+			name = 'Rec2020 - Linear',
 			alias = 'bt2020ln',
 			desc = 'ITU-R Recommendation BT.2020 Gamut - Linear',
 			encoding = 'scene-linear',
@@ -445,7 +445,7 @@ def get_colorspaces(OCIOv):
 			desc = 'Display encoding for an ITU-R Recommendation BT.1886 display with BT.709 primaries and a 2.4 power EOTF',
 			family = 'Display-Referred/Display Encoding',
 			encoding = 'sdr-video',
-			# chr = 'Rec.709 - Linear', # no gamut conversion, just display encoding inverse EOTF
+			chr = 'Rec709 - Linear',
 			tf = ocio_xform_exp(2.4, inv=True),
 			forward = False,
 		),
@@ -455,7 +455,7 @@ def get_colorspaces(OCIOv):
 			desc = 'Display encoding - sRGB Display with BT.709 primaries and pure 2.2 Power Electrical-Optical Transfer Function (EOTF)\nAlso called "sRGB Display" as proposed by Filmlight\nhttps://www.youtube.com/watch?v=NzhUzeNUBuM',
 			family = 'Display-Referred/Display Encoding',
 			encoding = 'sdr-video',
-			# chr = 'Rec.709 - Linear',
+			chr = 'Rec709 - Linear',
 			tf = ocio_xform_exp(2.2, inv=True),
 			forward = False,
 		),
@@ -465,7 +465,7 @@ def get_colorspaces(OCIOv):
 			desc = 'Display encoding - sRGB display with BT.709 primaries and ~2.2 power piecewise EOCF (Electrical to Optical Coding Function)\nThe piecewise encoding function from the IEC 61966-2-1 sRGB specification,\nsometimes incorrectly used as a display EOTF.',
 			family = 'Display-Referred/Display Encoding',
 			encoding = 'sdr-video',
-			# chr = 'Rec.709 - Linear',
+			chr = 'Rec709 - Linear',
 			tf = tfuncs.get('eocf_srgb'),
 			forward = False,
 		),
