@@ -16,7 +16,7 @@ def linspace(mn, mx, cnt):
 def gen_spi1d(fn, lut_path, inv=False, mn=0.0, mx=1.0, LUT_SIZE=2**14):
 	# generate a 1D LUT as an spi1d file, given a function fn
 	y = [str(round(fn(x, inv=inv), 9)) for x in linspace(mn, mx, LUT_SIZE)]
-	print(f'{lut_path}\n{y[:5]} ... {y[-5:]}')
+	# print(f'{lut_path}\n{y[:5]} ... {y[-5:]}')
 	contents = f'Version 1\nFrom {mn} {mx}\nLength {LUT_SIZE}\nComponents 1\n{{\n'
 	contents += '\n'.join(y)
 	contents += '\n}'
