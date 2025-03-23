@@ -171,6 +171,8 @@ def create_ocio_colorspace(c, reference, ocio_version_major, config_dir, LUT_SIZ
 			cs.setAllocation(ocio.ALLOCATION_LG2)
 			cs.setAllocationVars(GPU_ALLOCATIONVARS)
 	elif len(xforms) > 1:
+		if not c.forward:
+			xforms = xforms[::-1] # reverse order
 		# group transform required
 		grp_xform = ocio.GroupTransform()
 		for xform in xforms:
