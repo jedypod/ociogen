@@ -142,9 +142,9 @@ def create_ocio_colorspace(c, reference, ocio_version_major, config_dir, LUT_SIZ
 				os.makedirs(lut_dir)
 			lut_filepath = os.path.join(lut_dir, lut_filename)
 			if 'oetf' in c.tf.__name__:
-				gen_spi1d(c.tf, lut_filepath, mn=-0.1, mx=1.2, inv=True)
+				gen_spi1d(c.tf, lut_filepath, mn=-0.15, mx=1.2, inv=True, LUT_SIZE=LUT_SIZE)
 			elif 'eotf' in c.tf.__name__ or 'eocf' in c.tf.__name__:
-				gen_spi1d(c.tf, lut_filepath, mn=0.0, mx=1.2, inv=False)
+				gen_spi1d(c.tf, lut_filepath, mn=0.0, mx=1.2, inv=False, LUT_SIZE=LUT_SIZE)
 			xforms.append(ocio.FileTransform(lut_filename))
 		elif isinstance(c.tf, ocio.Transform):
 			xforms.append(c.tf)
