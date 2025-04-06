@@ -1,0 +1,849 @@
+# Working Spaces
+- name: bypass
+  category: work
+  shortname: bypass
+  alias: raw
+  description: "Non-Color Data"
+  encoding: data
+
+- name: XYZ D65
+  category: work
+  shortname: xyz-d65
+  alias: xyzd65
+  description: "Linear CIE XYZ adapted to the Illuminant D65 whitepoint"
+  encoding: scene-linear
+  chr: [1, 0, 0, 1, 0, 0, 0.3127, 0.329]
+
+- name: XYZ E
+  category: work
+  shortname: xyz-e
+  alias: xyze
+  description: "Linear CIE XYZ adapted to the Illuminant E whitepoint"
+  encoding: scene-linear
+  chr: [1, 0, 0, 1, 0, 0, 0.3333333333333333, 0.3333333333333333]
+
+- name: ACES 2065-1
+  category: work
+  shortname: aces
+  alias: ap0
+  description: |
+    Linear AP0 ACES 2065-1
+    TB-2014-004 : Informative Notes on SMPTE ST 2065-1 - Academy Color Encoding Specification (ACES)
+    http://j.mp/TB-2014-004
+  encoding: scene-linear
+  chr: [0.7347, 0.2653, 0.0, 1.0, 0.0001, -0.077, 0.32168, 0.33767]
+
+- name: ACEScg
+  category: work
+  shortname: acescg
+  alias: ap1
+  description: |
+    Linear AP1 ACEScg
+    S-2014-004 : ACEScg — A Working Space for CGI Render and Compositing
+    http://j.mp/S-2014-004
+  encoding: scene-linear
+  chr: [0.713, 0.293, 0.165, 0.83, 0.128, 0.044, 0.32168, 0.33767]
+
+- name: ACEScct
+  category: work
+  shortname: acescct
+  alias: acescct
+  description: |
+    ACES AP1 - ACEScct Log
+    S-2016-001 : ACEScct — A Quasi-Logarithmic Encoding of ACES Data for use within Color Grading Systems
+    http://j.mp/S-2016-001_
+  encoding: log
+  chr: ACEScg
+  tf: oetf_acescct
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.554794520547945
+      log_side_slope: 0.0570776255707763
+      lin_side_offset: 0.0
+      # lin_side_slope: null
+      lin_side_break: 0.0078125
+      # linear_slope: null
+
+- name: JPLog2
+  category: work
+  shortname: jplog2
+  alias: jplg2
+  description: |
+    ACEScg AP1 Gamut with JPLog2 Transfer Function
+    This is the log curve that Josh Pines contributed to the ACESLog Virtual Working Group:
+    https://community.acescentral.com/t/aceslog-strawman-proposal/5270
+
+    And then further popularized / promoted as proprietary technology by Dado Valentic:
+    https://colourlab.ai/jplog2
+  encoding: log
+  chr: ACEScg
+  tf: oetf_jplog2
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.513196480938416
+      log_side_slope: 0.0488758553274682
+      lin_side_offset: 0.0
+      lin_side_slope: 1.0
+      lin_side_break: 0.006801176276
+      # linear_slope: null
+
+- name: Filmlight - E-Gamut - Linear
+  category: work
+  shortname: filmlight-egamut-lin
+  alias: fegln
+  description: |
+    Filmlight E-Gamut - Linear
+    Specified in the flspace file included with the Baselight software
+    /etc/colourspaces/FilmLight_Linear_EGamut.flspace
+  encoding: scene-linear
+  chr: [0.8, 0.3177, 0.18, 0.9, 0.065, -0.0805, 0.3127, 0.329]
+
+- name: Filmlight - E-Gamut - T-Log
+  category: work
+  shortname: filmlight-egamut-tlog
+  alias: feglg
+  description: |
+    Filmlight E-Gamut - T-Log
+    Specified in the flspace file included with the Baselight software
+    /etc/colourspaces/FilmLight_TLog_EGamut.flspace
+  encoding: log
+  chr: Filmlight - E-Gamut - Linear
+  tf: oetf_filmlight_tlog
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.552012656860665
+      log_side_slope: 0.0639976040320219
+      lin_side_offset: 0.00570482440424738
+      # lin_side_slope: null
+      lin_side_break: 0.0
+      # linear_slope: null
+
+- name: Filmlight - E-Gamut2 - Linear
+  category: work
+  shortname: filmlight-egamut2-lin
+  alias: feg2ln
+  description: |
+    Filmlight E-Gamut2 - Linear
+    Specified in the flspace file included with the Baselight software
+    /etc/colourspaces/FilmLight_Linear_EGamut2.flspace
+  encoding: scene-linear
+  chr: [0.83, 0.31, 0.15, 0.95, 0.065, -0.0805, 0.3127, 0.329]
+
+- name: Filmlight - E-Gamut2 - T-Log
+  category: work
+  shortname: filmlight-egamut2-tlog
+  alias: feg2lg
+  description: |
+    Filmlight E-Gamut2 - T-Log
+    Specified in the flspace file included with the Baselight software
+    /etc/colourspaces/FilmLight_Linear_EGamut2.flspace
+  encoding: log
+  chr: Filmlight - E-Gamut2 - Linear
+  tf: oetf_filmlight_tlog
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.500867797955
+      log_side_slope: 0.055459048831
+      lin_side_offset: 0.00487980885981
+      # lin_side_slope: null
+      lin_side_break: 0.0
+      # linear_slope: null
+
+- name: Filmlight - E-Gamut2 - T-LogE
+  category: work
+  shortname: filmlight-egamut2-tloge
+  alias: feg2lge
+  description: |
+    Filmlight E-Gamut2 - T-LogE
+    Same as T-Log but upper range extended from 128 to 512.
+  encoding: log
+  chr: Filmlight - E-Gamut2 - Linear
+  tf: oetf_filmlight_tloge
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.552012656860665
+      log_side_slope: 0.0639976040320219
+      lin_side_offset: 0.00570482440424738
+      # lin_side_slope: null
+      lin_side_break: 0.0
+      # linear_slope: null
+
+- name: DaVinci - WideGamut - Linear
+  category: work
+  shortname: davinci-widegamut-lin
+  alias: dwgln
+  description: |
+    DaVinci Wide Gamut - Linear
+    https://documents.blackmagicdesign.com/InformationNotes/DaVinci_Resolve_17_Wide_Gamut_Intermediate.pdf
+  encoding: scene-linear
+  chr: [0.8, 0.313, 0.1682, 0.9877, 0.079, -0.1155, 0.3127, 0.329]
+
+- name: DaVinci - WideGamut - Intermediate Log
+  category: work
+  shortname: davinci-widegamut-dilog
+  alias: dwglg
+  description: |
+    DaVinci Wide Gamut - DaVinci Intermediate
+    https://documents.blackmagicdesign.com/InformationNotes/DaVinci_Resolve_17_Wide_Gamut_Intermediate.pdf
+  encoding: log
+  chr: DaVinci - WideGamut - Linear
+  tf: oetf_davinci_intermediate
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.51304736
+      log_side_slope: 0.07329248
+      lin_side_offset: 0.0075
+      # lin_side_slope: null
+      lin_side_break: 0.00262409
+      # linear_slope: null
+
+# Camera Spaces
+- name: Arri - WideGamut3 - Linear
+  category: camera
+  shortname: arri-wg3-lin
+  alias: awgln
+  description: |
+    Arri Wide Gamut - Linear
+    https://www.arri.com/resource/blob/31918/66f56e6abb6e5b6553929edf9aa7483e/2017-03-alexa-logc-curve-in-vfx-data.pdf
+  encoding: scene-linear
+  chr: [0.684, 0.313, 0.221, 0.848, 0.0861, -0.102, 0.3127, 0.329]
+
+- name: Arri - WideGamut3 - LogC3
+  category: camera
+  shortname: arri-wg3-logc3
+  alias: awglg
+  description: |
+    Arri Wide Gamut - LogCv3 EI800
+    https://www.arri.com/resource/blob/31918/66f56e6abb6e5b6553929edf9aa7483e/2017-03-alexa-logc-curve-in-vfx-data.pdf
+  encoding: log
+  chr: Arri - WideGamut3 - Linear
+  tf: oetf_arri_logc3
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.385537
+      log_side_slope: 0.0744116046281795
+      lin_side_offset: 0.052272
+      lin_side_slope: 5.555556
+      lin_side_break: 0.010591
+      # linear_slope: null
+  forward: true
+
+- name: Arri - WideGamut4 - Linear
+  category: camera
+  shortname: arri-wg4-lin
+  alias: awg4ln
+  description: |
+    Arri Wide Gamut 4 - Linear
+    https://www.arri.com/resource/blob/278790/bea879ac0d041a925bed27a096ab3ec2/2022-05-arri-logc4-specification-data.pdf
+  encoding: scene-linear
+  chr: [0.7347, 0.2653, 0.1424, 0.8576, 0.0991, -0.0308, 0.3127, 0.329]
+
+- name: Arri - WideGamut4 - LogC4
+  category: camera
+  shortname: arri-wg4-logc4
+  alias: awg4lg
+  description: |
+    Arri Wide Gamut 4 - LogC4
+    https://www.arri.com/resource/blob/278790/bea879ac0d041a925bed27a096ab3ec2/2022-05-arri-logc4-specification-data.pdf
+  encoding: log
+  chr: Arri - WideGamut4 - Linear
+  tf: oetf_arri_logc4
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: -0.295908392682586
+      log_side_slope: 0.0647954196341293
+      lin_side_offset: 64.0
+      lin_side_slope: 2231.82630906769
+      lin_side_break: -0.0180569961199113
+      # linear_slope: null
+
+- name: Blackmagic - WideGamut - Linear
+  category: camera
+  shortname: blackmagic-wg-lin
+  alias: bwgln
+  description: |
+    Blackmagic Camera Wide Gamut - Linear
+    Specified in the Blackmagic Generation 5 Color Science whitepaper included in the Blackmagic Raw SDK available here
+    https://www.blackmagicdesign.com/support/developer/product/camera-sdk
+  encoding: scene-linear
+  chr: [0.7177215, 0.3171181, 0.228041, 0.861569, 0.1005841, -0.0820452, 0.3127, 0.329]
+
+- name: Blackmagic - WideGamut - Gen5 Log
+  category: camera
+  shortname: blackmagic-wg-gen5log
+  alias: bwglg
+  description: |
+    Blackmagic Wide Gamut - Blackmagic Film Generation 5 Log (OETF)
+  encoding: log
+  chr: Blackmagic - WideGamut - Linear
+  tf: oetf_blackmagic_bmdfilmgen5
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.530013339229194
+      log_side_slope: 0.0602544253575227
+      lin_side_offset: 0.00549407243225781
+      # lin_side_slope: null
+      lin_side_break: 0.005
+      # linear_slope: null
+
+- name: Canon - Cinema Gamut - Linear
+  category: camera
+  shortname: canon-cgamut-lin
+  alias: ccgln
+  description: |
+    Canon Cinema Gamut - Linear
+    Note - this is the D55 daylight IDT matrix not the Tungsten IDT
+    Canon Cinema Gamut primaries specified on this marketing article for the Canon C500
+    https://www.usa.canon.com/internet/portal/us/home/explore/product-showcases/cameras-and-lenses/cinema-eos-firmware/c500
+
+    From https://www.usa.canon.com/internet/portal/us/home/support/details/cameras/cinema-eos/eos-c300-mark-iii-digital-cinema-camera/eos-c300-mark-iii-digital-cinema-camera?tab=drivers_downloads
+    Input Transform Version 202007 for EOS C300 Mark III - canon-eos-c300mk3-idt-202007.zip
+  encoding: scene-linear
+  chr: [0.74, 0.27, 0.17, 1.14, 0.08, -0.1, 0.3127, 0.329]
+
+- name: Canon - Cinema Gamut - C-Log2
+  category: camera
+  shortname: canon-cgamut-clog2
+  alias: ccglg
+  description: |
+    Canon CLog2
+    CLog2 is intended for grading workflows, whereas CLog3 is intended for a more "direct to display" workflow.
+
+    Canon log transfer functions are all described in this whitepaper:
+    https://downloads.canon.com/nw/learn/white-papers/cinema-eos/white-paper-canon-log-gamma-curves.pdf
+
+    The log transfer functions described above match the 1D LUTs available in the "Canon lookup table Version 201911"
+    download available here
+    https://www.usa.canon.com/internet/portal/us/home/support/details/cameras/cinema-eos/cinema-eos-c500-mark-ii?tab=drivers_downloads
+
+    However in the CTL ACES IDT provided in the "Input Transform Version 202007 for EOS C500 Mark II" file
+    at the above url, they add the /=0.9 on the scene-linear values. This function matches the IDT.
+  encoding: log
+  chr: Canon - Cinema Gamut - Linear
+  tf: oetf_canon_clog2
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.092864125
+      log_side_slope: 0.0726568315465552
+      lin_side_offset: 1.0
+      lin_side_slope: 96.7770833333333
+      lin_side_break: 0.0
+      # linear_slope: null
+
+- name: DJI - D-Gamut - Linear
+  category: camera
+  shortname: dji-dgamut-lin
+  alias: dgln
+  description: |
+    DJI D-Gamut - Linear
+    https://dl.djicdn.com/downloads/zenmuse+x7/20171010/D-Log_D-Gamut_Whitepaper.pdf
+  encoding: scene-linear
+  chr: [0.71, 0.31, 0.21, 0.88, 0.09, -0.08, 0.3127, 0.329]
+
+- name: DJI - D-Gamut - D-Log
+  category: camera
+  shortname: dji-dgamut-dlog
+  alias: dglg
+  description: |
+    DJI D-Gamut - D-Log
+    https://dl.djicdn.com/downloads/zenmuse+x7/20171010/D-Log_D-Gamut_Whitepaper.pdf
+  encoding: log
+  chr: DJI - D-Gamut - Linear
+  tf: oetf_dji_dlog
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.584555
+      log_side_slope: 0.0772632617771044
+      lin_side_offset: 0.0108
+      lin_side_slope: 0.9892
+      lin_side_break: 0.0078
+      linear_slope: 6.025 # ln_sl
+
+- name: Fujifilm - F-Gamut - Linear
+  category: camera
+  shortname: fuji-fgamut-lin
+  alias: fgln
+  description: |
+    Fujifilm F-Gamut - Linear
+    Note - F-Gamut is identical to Rec.2020
+    https://dl.fujifilm-x.com/support/lut/F-Log_DataSheet_E_Ver.1.0.pdf
+  encoding: scene-linear
+  chr: [0.708, 0.292, 0.17, 0.797, 0.131, 0.046, 0.3127, 0.329]
+
+- name: Fujifilm - F-Gamut - F-Log
+  category: camera
+  shortname: fuji-fgamut-flog
+  alias: fglg
+  description: |
+    Fujifilm F-Gamut - F-Log
+    https://dl.fujifilm-x.com/support/lut/F-Log_DataSheet_E_Ver.1.0.pdf
+  encoding: log
+  chr: Fujifilm - F-Gamut - Linear
+  tf: oetf_fujifilm_flog
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.790453
+      log_side_slope: 0.103757814785478
+      lin_side_offset: 0.009468
+      lin_side_slope: 0.555556
+      lin_side_break: 0.00089
+      linear_slope: 8.735631 # ln_sl
+
+- name: Fujifilm - F-Gamut - F-Log2
+  category: camera
+  shortname: fuji-fgamut-flog2
+  alias: fglg2
+  description: |
+    Fujifilm F-Gamut - F-Log2
+    https://dl.fujifilm-x.com/support/lut/F-Log2_DataSheet_E_Ver.1.0.pdf
+  encoding: log
+  chr: Fujifilm - F-Gamut - Linear
+  tf: oetf_fujifilm_flog2
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.384316
+      log_side_slope: 0.073836938366457
+      lin_side_offset: 0.064829
+      lin_side_slope: 5.555556
+      lin_side_break: 0.000889
+      linear_slope: 8.799461 # ln_sl
+
+- name: Fujifilm - F-GamutC - Linear
+  category: camera
+  shortname: fuji-fgamutc-lin
+  alias: fgcln
+  description: |
+    Fujifilm F-GamutC - Linear
+    https://dl.fujifilm-x.com/support/lut/F-Log2C_DataSheet_E_Ver.1.0.pdf
+  encoding: scene-linear
+  chr: [0.7347, 0.2653, 0.0263, 0.9737, 0.1173, -0.0224, 0.3127, 0.329]
+
+- name: Fujifilm - F-GamutC - F-Log2
+  category: camera
+  shortname: fuji-fgamutc-flog2
+  alias: fgclg2
+  description: |
+    Fujifilm F-GamutC - F-Log2
+    https://dl.fujifilm-x.com/support/lut/F-Log2C_DataSheet_E_Ver.1.0.pdf
+  encoding: log
+  chr: Fujifilm - F-GamutC - Linear
+  tf: oetf_fujifilm_flog2
+  tf_builtin: # Same params as F-Gamut F-Log2
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.384316
+      log_side_slope: 0.073836938366457
+      lin_side_offset: 0.064829
+      lin_side_slope: 5.555556
+      lin_side_break: 0.000889
+      linear_slope: 8.799461 # ln_sl
+
+- name: Leica - Rec.2020 - Linear
+  category: camera
+  shortname: leica-rec2020-lin
+  alias: llgln
+  description: |
+    Leica Rec.2020 - Linear
+    https://leica-camera.com/sites/default/files/pm-65977-210914__L-Log_Reference_Manual_EN.pdf
+  encoding: scene-linear
+  chr: [0.708, 0.292, 0.17, 0.797, 0.131, 0.046, 0.3127, 0.329]
+
+- name: Leica - Rec.2020 - L-Log
+  category: camera
+  shortname: leica-rec2020-llog
+  alias: llglg
+  description: |
+    Leica Rec.2020 - L-Log
+    https://leica-camera.com/sites/default/files/pm-65977-210914__L-Log_Reference_Manual_EN.pdf
+  encoding: log
+  chr: Leica - Rec.2020 - Linear
+  tf: oetf_leica_llog
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.6
+      log_side_slope: 0.0812780988292749
+      lin_side_offset: 0.0115
+      lin_side_slope: 1.3
+      lin_side_break: 0.006
+      linear_slope: 8.0 # ln_sl
+
+- name: Nikon - Rec.2020 - Linear
+  category: camera
+  shortname: nikon-rec2020-lin
+  alias: ngln
+  description: |
+    Nikon Gamut - Linear
+    Note - Nikon Gamut is identical to Rec.2020
+    http://download.nikonimglib.com/archive3/hDCmK00m9JDI03RPruD74xpoU905/N-Log_Specification_(En)01.pdf
+  encoding: scene-linear
+  chr: Rec.2020 - Linear
+
+- name: Nikon - Rec.2020 - N-Log
+  category: camera
+  shortname: nikon-rec2020-nlog
+  alias: nglg
+  description: |
+    Nikon Gamut - N-Log
+    http://download.nikonimglib.com/archive3/hDCmK00m9JDI03RPruD74xpoU905/N-Log_Specification_(En)01.pdf
+  encoding: log
+  chr: Nikon - Rec.2020 - Linear
+  tf: oetf_nikon_nlog
+  # No tf_builtin for N-Log as it uses exp/pow, not LogCameraTransform
+
+- name: Apple - Rec.2020 - Linear
+  category: camera
+  shortname: apple-rec2020-lin
+  alias: apln
+  description: |
+    Apple - Rec.2020 Linear
+  chr: Rec.2020 - Linear
+
+- name: Apple - Rec.2020 - Apple-Log
+  category: camera
+  shortname: apple-rec2020-alog
+  alias: aplg
+  description: |
+    Apple - Rec.2020 - Apple-Log
+  chr: Rec.2020 - Linear
+  tf: oetf_apple_log
+  # No tf_builtin for Apple Log as it uses pow/sqrt, not LogCameraTransform
+
+- name: Samsung - Rec.2020 - Linear
+  category: camera
+  shortname: samsung-rec2020-lin
+  alias: smln
+  description: |
+    Samsung - Rec.2020 Linear
+  chr: Rec.2020 - Linear
+
+- name: Samsung - Rec.2020 - Samsung-Log
+  category: camera
+  shortname: samsung-rec2020-slog
+  alias: smlg
+  description: |
+    Samsung - Rec.2020 - Samsung-Log
+  chr: Rec.2020 - Linear
+  tf: oetf_samsung_log
+  # No tf_builtin for Samsung Log as it uses pow/log10, not LogCameraTransform
+
+- name: Xiaomi - Rec.2020 - Linear
+  category: camera
+  shortname: xiaomi-rec2020-lin
+  alias: xmln
+  description: |
+    Xiaomi - Rec.2020 Linear
+  chr: Rec.2020 - Linear
+
+- name: Xiaomi - Rec.2020 - Xiaomi-Log
+  category: camera
+  shortname: xiaomi-rec2020-xlog
+  alias: xmlg
+  description: |
+    Xiaomi - Rec.2020 - Xiaomi-Log
+  chr: Rec.2020 - Linear
+  tf: oetf_xiaomi_log
+  # No tf_builtin for Xiaomi Log as it uses pow/log2, not LogCameraTransform
+
+- name: Panasonic - V-Gamut - Linear
+  category: camera
+  shortname: panasonic-vgamut-lin
+  alias: vgln
+  description: |
+    Panasonic V-Gamut - Linear
+    https://pro-av.panasonic.net/en/cinema_camera_varicam_eva/support/pdf/VARICAM_V-Log_V-Gamut.pdf
+  encoding: scene-linear
+  chr: [0.73, 0.28, 0.165, 0.84, 0.1, -0.03, 0.3127, 0.329]
+
+- name: Panasonic - V-Gamut - V-Log
+  category: camera
+  shortname: panasonic-vgamut-vlog
+  alias: vglg
+  description: |
+    Panasonic V-Gamut - V-Log
+    https://pro-av.panasonic.net/en/cinema_camera_varicam_eva/support/pdf/VARICAM_V-Log_V-Gamut.pdf
+  encoding: log
+  chr: Panasonic - V-Gamut - Linear
+  tf: oetf_panasonic_vlog
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.598206
+      log_side_slope: 0.0727029583727907
+      lin_side_offset: 0.00873
+      # lin_side_slope: null
+      lin_side_break: 0.01
+      # linear_slope: null
+
+- name: Red - WideGamutRGB - Linear
+  category: camera
+  shortname: red-wg-lin
+  alias: rwgln
+  description: |
+    Red Wide Gamut RGB - Linear
+    https://docs.red.com/955-0187/PDF/915-0187%20Rev-C%20%20%20RED%20OPS,%20White%20Paper%20on%20REDWideGamutRGB%20and%20Log3G10.pdf
+  encoding: scene-linear
+  chr: [0.780308, 0.304253, 0.121595, 1.493994, 0.095612, -0.084589, 0.3127, 0.329]
+
+- name: Red - WideGamutRGB - Log3G10
+  category: camera
+  shortname: red-wg-log3g10
+  alias: rwglg
+  description: |
+    Red Wide Gamut RGB - Log3G10
+    https://docs.red.com/955-0187/PDF/915-0187%20Rev-C%20%20%20RED%20OPS,%20White%20Paper%20on%20REDWideGamutRGB%20and%20Log3G10.pdf
+  encoding: log
+  chr: Red - WideGamutRGB - Linear
+  tf: oetf_red_log3g10
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.0
+      log_side_slope: 0.067515609487509
+      lin_side_offset: 2.55975327
+      lin_side_slope: 155.975327
+      lin_side_break: -0.01
+      # linear_slope: null
+
+- name: Sony - S-Gamut3 - Linear
+  category: camera
+  shortname: sony-sgamut3-lin
+  alias: sg3ln
+  description: |
+    Sony S-Gamut3 - Linear
+    Note: S-Gamut and S-Gamut3 have identical primaries.
+    They are described as more of a camera negative colorspace than a grading space in the whitepaper.
+    https://pro.sony/ue_US/support/article/CA000001
+  encoding: scene-linear
+  chr: [0.73, 0.28, 0.14, 0.855, 0.1, -0.05, 0.3127, 0.329]
+
+- name: Sony - S-Gamut3 - S-Log3
+  category: camera
+  shortname: sony-sgamut3-slog3
+  alias: sg3lg3
+  description: |
+    Sony S-Gamut3 - S-Log3
+    https://pro.sony/ue_US/support/article/CA000001
+  encoding: log
+  chr: Sony - S-Gamut3 - Linear
+  tf: oetf_sony_slog3
+  tf_builtin:
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.410557184750733
+      log_side_slope: 0.0769495052454847
+      lin_side_offset: 0.0526315789473684
+      lin_side_slope: 5.26315789473684
+      lin_side_break: 0.01125
+      linear_slope: 6.62194371177582 # ln_sl
+
+- name: Sony - S-Gamut3.Cine - Linear
+  category: camera
+  shortname: sony-sgamut3cine-lin
+  alias: sg3cln
+  description: |
+    Sony S-Gamut3.Cine - Linear
+    The Cine variation of S-Gamut3 is more closely aligned to P3 and is more suitable as a grading colorspace.
+  encoding: scene-linear
+  chr: [0.766, 0.275, 0.225, 0.8, 0.089, -0.087, 0.3127, 0.329]
+
+- name: Sony - S-Gamut3.Cine - S-Log3
+  category: camera
+  shortname: sony-venice-sgamut3cine-slog3 # Shortname mismatch with name? Keeping shortname from original file
+  alias: vsg3clg3
+  description: |
+    Sony Venice S-Gamut3.Cine - S-Log3
+    https://pro.sony/ue_US/support/article/CA000001
+  encoding: log
+  chr: Sony - Venice S-Gamut3.Cine - Linear # Name mismatch with chr? Keeping chr from original file
+  tf: oetf_sony_slog3
+  tf_builtin: # Same params as S-Gamut3 S-Log3
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.410557184750733
+      log_side_slope: 0.0769495052454847
+      lin_side_offset: 0.0526315789473684
+      lin_side_slope: 5.26315789473684
+      lin_side_break: 0.01125
+      linear_slope: 6.62194371177582 # ln_sl
+
+- name: Sony - Venice S-Gamut3 - Linear
+  category: camera
+  shortname: sony-venice-sgamut3-lin
+  alias: vsg3ln
+  description: |
+    Sony Venice S-Gamut3 - Linear
+    RGBW xy Chromaticity coordinates calculated from the AP0 3x3 matrix available here:
+    https://github.com/ampas/aces-core/blob/710ecbe52c87ce9f4a1e02c8ddf7ea0d6b611cc8/transforms/ctl/idt/vendorSupplied/sony/IDT.Sony.Venice_SLog3_SGamut3.ctl
+  encoding: scene-linear
+  chr: [0.740464264304292, 0.27936437475066, 0.089241145423286, 0.893809528608105, 0.110488236673827, -0.052579333080476, 0.3127, 0.329]
+
+- name: Sony - Venice S-Gamut3 - S-Log3
+  category: camera
+  shortname: sony-venice-sgamut3-slog3
+  alias: vsg3lg3
+  description: |
+    Sony Venice S-Gamut3 - S-Log3
+    https://pro.sony/ue_US/support/article/CA000001
+  encoding: log
+  chr: Sony - Venice S-Gamut3 - Linear
+  tf: oetf_sony_slog3
+  tf_builtin: # Same params as S-Gamut3 S-Log3
+    type: LogCameraTransform
+    params:
+      log_side_offset: 0.410557184750733
+      log_side_slope: 0.0769495052454847
+      lin_side_offset: 0.0526315789473684
+      lin_side_slope: 5.26315789473684
+      lin_side_break: 0.01125
+      linear_slope: 6.62194371177582 # ln_sl
+
+- name: Sony - Venice S-Gamut3.Cine - Linear
+  category: camera
+  shortname: sony-venice-sgamut3cine-slog3 # Shortname mismatch with name? Keeping shortname from original file
+  alias: vsg3cln
+  description: |
+    Sony Venice S-Gamut3.Cine - Linear
+    RGBW xy Chromaticity coordinates calculated from the AP0 3x3 matrix available here:
+    https://github.com/ampas/aces-core/blob/710ecbe52c87ce9f4a1e02c8ddf7ea0d6b611cc8/transforms/ctl/idt/vendorSupplied/sony/IDT.Sony.Venice_SLog3_SGamut3Cine.ctl
+  encoding: scene-linear
+  chr: [0.775901871567345, 0.274502392854799, 0.188682902773355, 0.828684937020288, 0.101337382499301, -0.089187517306263, 0.3127, 0.329]
+
+
+
+# Display Spaces
+- name: Rec.709 - Linear
+  category: work
+  shortname: rec709-lin
+  alias: rec709ln
+  description: |
+    ITU-R Recommendation BT.709 Gamut - Linear
+  encoding: scene-linear
+  chr: [0.64, 0.33, 0.3, 0.6, 0.15, 0.06, 0.3127, 0.329]
+
+- name: Rec.2020 - Linear
+  category: work
+  shortname: rec2020-lin
+  alias: rec2020ln
+  description: |
+    ITU-R Recommendation BT.2020 Gamut - Linear
+  encoding: scene-linear
+  chr: [0.708, 0.292, 0.17, 0.797, 0.131, 0.046, 0.3127, 0.329]
+
+- name: P3D65 - Linear
+  category: work
+  shortname: p3d65-lin
+  alias: p3d65ln
+  description: |
+    P3 Gamut Linear, with a D65 whitepoint.
+  encoding: scene-linear
+  chr: [0.68, 0.32, 0.265, 0.69, 0.15, 0.06, 0.3127, 0.329]
+
+- name: Rec.1886
+  category: display
+  shortname: rec1886
+  alias: rec1886
+  description: |
+    Display encoding for a ITU-R Reccomendation BT.1886 display with
+    a 2.4 power funtion EOTF, Rec.709 primaries, a D65 whitepoint, 100 nits peak luminance,
+    and a 5 nits ambient surround illumination level.
+  chr: Rec.709 - Linear
+  tf: eotf_rec1886
+  tf_builtin:
+    type: ExponentTransform
+    params:
+      value: 2.4
+  forward: false
+
+- name: sRGB Display
+  category: display
+  shortname: srgb-display
+  alias: srgb-display
+  description: |
+    sRGB Display with BT.709 primaries and pure 2.2 Power Electrical-Optical Transfer Function (EOTF)
+    Also called "sRGB Display" as proposed by Filmlight
+    https://www.youtube.com/watch?v=NzhUzeNUBuM
+  encoding: sdr-video
+  chr: Rec.709 - Linear
+  tf: eotf_srgb
+  tf_builtin:
+    type: ExponentTransform
+    params:
+      value: 2.2
+  forward: false
+
+- name: sRGB Encoding
+  category: display
+  shortname: srgb-encoding
+  alias: srgb-encoding
+  description: |
+    Display encoding for a display which is incorrectly calibrated to use
+    the piecewise sRGB Encoding function as the EOTF.
+  encoding: sdr-video
+  chr: Rec.709 - Linear
+  tf: eocf_srgb
+  tf_builtin:
+    type: ExponentWithLinearTransform
+    params:
+      gamma: 2.4
+      offset: 0.055
+  forward: false
+
+- name: DCIP3 D65
+  category: display
+  shortname: dci-p3d65
+  alias: dci-p3d65
+  description: |
+    DCI display with P3 primaries and pure 2.6 power EOTF
+  encoding: sdr-video
+  chr: P3D65 - Linear
+  tf: eotf_gamma26
+  tf_builtin:
+    type: ExponentTransform
+    params:
+      value: 2.6
+  forward: false
+
+- name: Display P3
+  category: display
+  shortname: display-p3
+  alias: display-p3
+  description: |
+    Apple Display P3 with P3 primaries and pure 2.2 power EOTF (NOT the Piecewise OETF as wrongly defined in the spec, since most apple devices use 2.2 power EOTF)
+    https://developer.apple.com/documentation/coregraphics/cgcolorspace/displayp3
+  encoding: sdr-video
+  chr: P3D65 - Linear
+  tf: eotf_srgb
+  tf_builtin:
+    type: ExponentTransform
+    params:
+      value: 2.2
+  forward: false
+
+- name: Rec2100 PQ
+  category: display
+  shortname: rec2100-pq
+  alias: pq
+  description: |
+    Rec.2020 Primaries with ST.2084 PQ Transfer Function.
+  encoding: hdr-video
+  chr: Rec.2020 - Linear
+  tf: eotf_st2084
+  tf_builtin:
+    type: BuiltinTransform
+    params:
+      style: CURVE - LINEAR_to_ST-2084
+  forward: false

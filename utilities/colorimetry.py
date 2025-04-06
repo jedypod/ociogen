@@ -28,7 +28,7 @@ def is_identity(mtx):
 	return all(abs(a - b) <= 1e-12 for row1, row2 in zip(mtx, identity(3)) for a, b in zip(row1, row2))
 
 def diag(m, v):
-	# set diagonal row of matrix m to vector v or float v
+	# set diagonal of matrix m to vector v or float v
 	if isinstance(v, float):
 		v = [v]*len(m)
 	for p in range(len(m)):

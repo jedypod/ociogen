@@ -1,0 +1,134 @@
+settings:
+  # The directory name that will be created for your config.
+  config_name: my-ocio-config
+  # A description for the generated OCIO configuration file.
+  config_description: "An OCIO config generated with ociogen."
+  # The output directory where the config folder (named using config_name) and its LUTs will be placed. Supports '~' for user home directory.
+  config_location: ~/
+  # Determines which major version of OCIO the config will be generated for. Valid values are 1 and 2.
+  ocio_version_major: 1 
+  # Use a more compressed name for the colorspaces, without spaces.
+  use_shortnames: false
+  # Enables description entries in each colorspace
+  enable_descriptions: false 
+  # Whether to use the really long description or a shorter one (just the longname)
+  verbose_descriptions: false 
+  # Enables built in transforms like LogCameraTransform, if OCIO v2. USE WITH CAUTION as it is 26x less precise than an spi1d LUT of length 8192
+  enable_builtins: false 
+  # Enables "encoding" information on each colorspace, if OCIO v2
+  enable_colorspace_encoding: false
+  # Enables "aliases" on each colorspace in OCIO v2 (there are some extremely shortnames in the colorspaces.yaml file that will be used)
+  enable_colorspace_aliases: false
+  # The length of any generated spi1d LUTs. This is 2^spi1d_lut_precision, so 13=2^13=8192
+  spi1d_lut_precision: 13
+  # The reference colorspace for your config (a yaml reference is used so we can reuse this later in the role definitions)
+  reference_colorspace: &ref_lin filmlight-egamut2-lin
+  # The reference log colorspace for your config (a yaml reference is used so we can reuse this later in the role definitions)
+  reference_log_colorspace: &ref_log filmlight-egamut2-tlog
+
+  # Sets the OCIO Folder ("Family") for the colorspace, based on the category
+  category_folder_names:
+    - work: Working Spaces
+    - camera: Camera Spaces
+    - display: Display Spaces
+    - image: Image Formation # Category for generated view transforms
+
+  # Settings for discovering and generating view transforms from LUTs
+  view_transform_settings:
+    # Relative or absolute path to the directory containing view transform LUTs
+    lut_search_path: ../luts
+    # Define the pattern for LUT filenames. Placeholders: {viewName}, {displaySpace}, {shaperSpace}
+    # The script will discover displays/views based on LUTs matching this pattern.
+    # Underscore characters will be replaced with spaces in {viewName}
+    lut_filename_pattern: "{viewName}__{shaperSpace}_to_{displaySpace}"
+
+  # The view_mutate option allows views for additional displays to be added based on the same LUT. 
+  # For example if a LUT for a rec1886 display space is found, and one for srgb-dispay and srgb-encoding is not found,
+  # srgb-display would automatically be added along with the equivalent views.
+  view_mutate:
+    rec1886:
+      - srgb-display
+      # - srgb-encoding
+    # display-p3:
+    #   - dci-p3d65
+
+
+# Add the roles you want to show up in the generated config, and their default values.
+roles:
+  scene_linear: *ref_lin
+  color_timing: *ref_log
+  compositing_log: *ref_log
+  compositing_linear: *ref_lin
+  data: *ref_lin
+  default: *ref_lin
+  color_picking: *ref_lin
+  matte_paint: *ref_log
+  texture_paint: *ref_lin
+  mari_monitor: *ref_lin
+
+
+# active_colorspaces determines which colorspaces from colorspaces.yaml are included in the generated OCIO Config
+# feel free to uncomment the spaces you don't need
+active_colorspaces:
+  - bypass
+  - xyz-d65
+  - xyz-e
+  - aces-ap0
+  - acescg
+  - acescct
+  # - jplog2
+  - filmlight-egamut-lin
+  - filmlight-egamut-tlog
+  - filmlight-egamut2-lin
+  - filmlight-egamut2-tlog
+  - filmlight-egamut2-tloge
+  - davinci-widegamut-lin
+  - davinci-widegamut-dilog
+  - arri-wg3-lin
+  - arri-wg3-logc3
+  - arri-wg4-lin
+  - arri-wg4-logc4
+  - blackmagic-wg-lin
+  - blackmagic-wg-gen5log
+  - canon-cgamut-lin
+  - canon-cgamut-clog2
+  - dji-dgamut-lin
+  - dji-dgamut-dlog
+  - fuji-fgamut-lin
+  - fuji-fgamut-flog
+  - fuji-fgamut-flog2
+  - fuji-fgamutc-lin
+  - fuji-fgamutc-flog2
+  - leica-rec2020-lin
+  - leica-rec2020-llog
+  - nikon-rec2020-lin
+  - nikon-rec2020-nlog
+  - apple-rec2020-lin
+  - apple-rec2020-alog
+  - samsung-rec2020-lin
+  - samsung-rec2020-slog
+  - xiaomi-rec2020-lin
+  - xiaomi-rec2020-xlog
+  - panasonic-vgamut-lin
+  - panasonic-vgamut-vlog
+  - red-wg-lin
+  - red-wg-log3g10
+  - sony-sgamut3-lin
+  - sony-sgamut3-slog3
+  - sony-sgamut3cine-lin
+  - sony-venice-sgamut3cine-slog3
+  - sony-venice-sgamut3-lin
+  - sony-venice-sgamut3-slog3
+  - sony-venice-sgamut3cine-slog3
+  - rec709-lin
+  - rec2020-lin
+  - p3d65-lin
+  - rec1886
+  - srgb-display
+  - srgb-encoding
+  - dci-p3d65
+  - display-p3
+  - rec2100-pq
+
+
+colorspaces: !include colorspaces.yaml
