@@ -27,7 +27,7 @@
 ## Blackmagic
 - DaVinci Intermediate Log
   `DaVinci_Resolve_17_Wide_Gamut_Intermediate.pdf`
-  https://documents.blackmagicdesign.com/InformationNotes/
+  https://documents.blackmagicdesign.com/InformationNotes/DaVinci_Resolve_17_Wide_Gamut_Intermediate.pdf
 
 - Blackmagic Film Generation 5
   Specified in the Blackmagic Generation 5 Color Science whitepaper included in the Blackmagic Raw SDK available here
@@ -77,7 +77,7 @@
 
 ## Leica
 - Leica L-Log
-	https://leica-camera.com/sites/default/files/pm-65977-210914__L-Log_Reference_Manual_EN.pdf
+	https://leica-camera.com/sites/default/files/pm-118912-L-Log_Reference_Manual_V1.6.pdf
 
 ## Nikon
 - Nikon N-Log
@@ -111,7 +111,6 @@
 ## Samsung
 - Samsung Log
   Whitepaper available here (behind registration wall) https://developer.samsung.com/mobile/samsung-log-video.html
-  https://www.desmos.com/calculator/buvy7krazo
 
 ## Xiaomi
 - Xiaomi Log
@@ -139,7 +138,6 @@
   The piecewise encoding function from the IEC 61966-2-1 sRGB specification,
   sometimes incorrectly used as a monitor EOTF for an sRGB Display. 
   The correct EOTF for an sRGB Display is a 2.2 power function.
-  https://www.desmos.com/calculator/wqh4zdnksz
   https://webstore.iec.ch/publication/6169
 
 ## Rec.1886
