@@ -134,6 +134,7 @@ Run the GUI using one of the methods described in [Running the Software](#runnin
 The GUI loads the default `config_settings.yaml` and `colorspaces.yaml` on startup to populate the initial values. You can then modify these settings before generating the config.
 
 ### General Settings Tab
+![screenshot_2025-04-06_14-36-16](https://github.com/user-attachments/assets/7e04759a-475b-4e60-8ea9-acd9da4a069d)
 
 This tab mirrors most options found in the `settings` section of `config_settings.yaml`.
 
@@ -150,6 +151,7 @@ This tab mirrors most options found in the `settings` section of `config_setting
 *   **Category Folder Names:** Allows editing the mapping between colorspace categories (`work`, `camera`, `display`, `image`) and the desired folder/family names for applications.
 
 ### Colorspaces & Roles Tab
+![screenshot_2025-04-06_14-36-24](https://github.com/user-attachments/assets/03a9bcb8-cb3f-4e79-8773-94309291cb7c)
 
 This tab manages the selection of active colorspaces and the assignment of colorspaces to OCIO roles.
 
@@ -171,6 +173,7 @@ This tab manages the selection of active colorspaces and the assignment of color
     *   **Deleting:** Select one or more rows and click "Delete Selected Role(s)" or press the `Delete` key.
 
 ### View Transforms Tab
+![screenshot_2025-04-06_14-36-51](https://github.com/user-attachments/assets/c94b4eee-0e1c-4a62-951e-bfe41ca52889)
 
 This tab handles the discovery, configuration, and mutation of view transforms based on LUT files.
 
