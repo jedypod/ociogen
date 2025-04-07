@@ -2711,7 +2711,12 @@ __all__ = [
     "apply_dark_theme",
     "apply_light_theme"
 ]
-if __name__ == "__main__":
+
+def main():
+    """Main function to run the OCIOGen GUI."""
     root = tk.Tk()
     app = OCIOGenGUI(root)
     root.mainloop()
+
+if __name__ == "__main__":
+    main()

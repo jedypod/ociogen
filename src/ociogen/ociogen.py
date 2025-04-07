@@ -1348,9 +1348,12 @@ __all__ = [
     "OCIOConfig",
     VALID_LUT_EXTENSIONS
 ]
-
-# Usage example
-if __name__ == "__main__":
+def main():
     # When run as script, load default config_settings.yaml
     config = OCIOConfig() # No args uses default path
     config.create_config()
+
+
+# Usage example
+if __name__ == "__main__":
+    main()
