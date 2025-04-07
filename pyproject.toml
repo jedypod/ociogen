@@ -1,0 +1,21 @@
+[project]
+name = "ociogen"
+version = "0.2.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jed Smith", email = "jed.coma316@passmail.net" }
+]
+requires-python = ">=3.7"
+dependencies = [
+    "opencolorio>=2.0",
+    "pyyaml>=3.0",
+]
+
+[project.scripts]
+ociogen = "ociogen:ociogen"
+ociogengui = "ociogen:ociogengui"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

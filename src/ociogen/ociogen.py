@@ -15,20 +15,16 @@ import ast
 import glob # Add glob for file searching
 import fnmatch # Add fnmatch for wildcard matching
 from collections import OrderedDict # Import OrderedDict
-
-VALID_LUT_EXTENSIONS = {'.cube', '.cub', '.spi1d', '.spi3d', '.3dl', '.csp'} # Added spi1d for completeness, though maybe not strictly needed for view transforms
-
+from pathlib import Path
 from dataclasses import dataclass
 from inspect import getmembers, isfunction
 
-from utilities import transfer_functions
-from utilities.colorimetry import *
+from .utilities import transfer_functions
+from .utilities.colorimetry import *
+from .settings import PACKAGE_CONFIG_SETTINGS_PATH, LOCAL_CONFIG_SETTINGS_PATH
 
+VALID_LUT_EXTENSIONS = {'.cube', '.cub', '.spi1d', '.spi3d', '.3dl', '.csp'} # Added spi1d for completeness, though maybe not strictly needed for view transforms
 
-# Make sure we have a recent enough python version
-MIN_PYTHON = (3, 7)
-if sys.version_info < MIN_PYTHON:
-    sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
 
 # https://stackoverflow.com/questions/528281/how-can-i-include-a-yaml-file-inside-another
@@ -56,10 +52,30 @@ class Colorspace:
     tf: object = None # Colorspace transfer function: a python method or None if linear
     tf_builtin: object = None # OCIO Builtin function option (OCIO v2 only)
     forward: bool = True # forward is the TO_REFERENCE direction, otherwise FROM_REFERENCE
+    """
+    Colorspace dataclass.
+
+    Attributes:
+        name (str): Colorspace name.
+        category (object): Category of the colorspace (work, camera, display, image).
+        shortname (object): Short compressed version of the colorspace name.
+        alias (object): Alias for this colorspace (OCIO V2 only).
+        description (str): Colorspace description.
+        encoding (str): Colorspace encoding: scene-linear, log, sdr-video, hdr-video, data (OCIO V2 only).
+        chr (object): 1x8 list of RGBW xy chromaticities, or string for another colorspace.
+        tf (object): Colorspace transfer function: a python method or None if linear.
+        tf_builtin (object): OCIO Builtin function option (OCIO v2 only).
+        forward (bool): Forward direction is the TO_REFERENCE direction, otherwise FROM_REFERENCE.
+    """
 
 
 class OCIOConfig:
-    def __init__(self, config_data=None, config_path=None, output_dir=None):
+    def __init__(
+        self,
+        config_data=None,
+        config_path=PACKAGE_CONFIG_SETTINGS_PATH,
+        output_dir=None
+    ):
         """
         Initialize OCIOConfig.
         Loads configuration from config_data dict, config_path file,
@@ -67,6 +83,7 @@ class OCIOConfig:
         output_dir specifies the parent directory for the generated config folder.
         """
         settings_source = None # Variable to hold the dictionary containing settings
+        colorspace_list_data = None # Variable to hold list of color spaces
 
         if config_data:
             # If data is injected (from GUI), it should contain the 'settings' key directly
@@ -74,8 +91,6 @@ class OCIOConfig:
             print("Loading config from provided data (GUI)...") # Add log
         else:
             # Load from file path
-            if config_path is None:
-                config_path = os.path.join(os.path.dirname(__file__), 'config_settings.yaml')
             print(f'Loading config from file: {config_path}')
             if os.path.isfile(config_path):
                 with open(config_path, 'r') as f:
@@ -1327,6 +1342,12 @@ class OCIOConfig:
         # cfg = re.sub(r'\n\s*\n', '\n', cfg) # Keep this commented for now
         return cfg.strip() # Remove leading/trailing whitespace
 
+__all__ = [
+    "Colorspace"
+    "IncludeLoader",
+    "OCIOConfig",
+    VALID_LUT_EXTENSIONS
+]
 
 # Usage example
 if __name__ == "__main__":

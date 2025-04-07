@@ -13,14 +13,7 @@ import tkinter.font as tkFont # Added for text width measurement
 from collections import OrderedDict # For ordered roles
 from dataclasses import asdict # To convert Colorspace objects back to dicts
 from tkinter import simpledialog # For simple input dialogs
-
-# Attempt to import from ociogen.py - adjust path if necessary
-try:
-    # Assuming ociogen.py is in the same directory
-    from ociogen import OCIOConfig, Colorspace, IncludeLoader, VALID_LUT_EXTENSIONS
-except ImportError:
-    messagebox.showerror("Import Error", "Could not import required components from ociogen.py. Make sure it's in the same directory or accessible via PYTHONPATH.")
-    sys.exit(1)
+from .ociogen import OCIOConfig, Colorspace, IncludeLoader, VALID_LUT_EXTENSIONS
 
 
 
@@ -2711,6 +2704,13 @@ class OCIOGenGUI:
 
     # --- End Treeview Context Menu Logic ---
 
+
+__all__ = [
+    "OCIOGenGUI",
+    "Tooltip",
+    "apply_dark_theme",
+    "apply_light_theme"
+]
 if __name__ == "__main__":
     root = tk.Tk()
     app = OCIOGenGUI(root)

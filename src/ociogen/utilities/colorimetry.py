@@ -143,3 +143,11 @@ def rgb_to_rgb(ch0, ch1, cat_method='cat02'):
 	rgb0_to_rgb1 = matmul(inv(rgb1_to_xyz), rgb0_to_cat)
 	# rgb0_to_rgb1 = [round(e, 16) for r in rgb0_to_rgb1 for e in r]
 	return rgb0_to_rgb1
+
+
+__all__ = [
+	"cat", "det", "diag", "flatten", "inv", "identity",
+	"is_identity", "matmul", "npm", "pad_4x4", "reshape",
+	"rgb_to_rgb", "rgb_to_xyz_cat", "transpose", "vdot",
+	"wp", "xy_to_XYZ", "zeros"
+]
