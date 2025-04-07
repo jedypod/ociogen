@@ -1,2 +1,3 @@
 PyYAML>=3.0
 opencolorio>=2.0
+importlib-resources>=6.0
