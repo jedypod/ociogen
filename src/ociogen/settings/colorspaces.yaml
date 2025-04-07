@@ -175,7 +175,7 @@
 
 - name: DaVinci - WideGamut - Linear
   category: work
-  shortname: davinci-widegamut-lin
+  shortname: davinci-wg-lin
   alias: dwgln
   description: |
     DaVinci Wide Gamut - Linear
@@ -185,7 +185,7 @@
 
 - name: DaVinci - WideGamut - Intermediate Log
   category: work
-  shortname: davinci-widegamut-dilog
+  shortname: davinci-wg-ilog
   alias: dwglg
   description: |
     DaVinci Wide Gamut - DaVinci Intermediate

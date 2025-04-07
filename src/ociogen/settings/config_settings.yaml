@@ -73,7 +73,7 @@ active_colorspaces:
   - bypass
   - xyz-d65
   - xyz-e
-  - aces-ap0
+  - aces
   - acescg
   - acescct
   # - jplog2
@@ -82,8 +82,8 @@ active_colorspaces:
   - filmlight-egamut2-lin
   - filmlight-egamut2-tlog
   - filmlight-egamut2-tloge
-  - davinci-widegamut-lin
-  - davinci-widegamut-dilog
+  - davinci-wg-lin
+  - davinci-wg-ilog
   - arri-wg3-lin
   - arri-wg3-logc3
   - arri-wg4-lin
