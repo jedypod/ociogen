@@ -13,7 +13,7 @@ def _get_local_config_settings_path() -> Path:
     Returns the path to the local config settings file.
     """
     _package_name = "ociogen"
-    _local_config_path = os.getenv("XDG_CONFIG_HOME", Path.home()/".config")
+    _local_config_path = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
     return _local_config_path/f"{_package_name}/config_settings.yaml"
 
 def _copy_package_config_settings_to_local():
