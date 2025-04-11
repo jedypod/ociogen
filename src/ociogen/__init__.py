@@ -1,5 +1,5 @@
-from .settings import PACKAGE_CONFIG_SETTINGS_PATH, LOCAL_CONFIG_SETTINGS_PATH
-from .ociogen import OCIOConfig, IncludeLoader, Colorspace, VALID_LUT_EXTENSIONS
+from .data import PACKAGE_CONFIG_SETTINGS_PATH, LOCAL_CONFIG_SETTINGS_PATH
+from .ociogen import OCIOConfig, Colorspace, VALID_LUT_EXTENSIONS
 from .ociogengui import OCIOGenGUI, Tooltip, apply_dark_theme, apply_light_theme
 
 

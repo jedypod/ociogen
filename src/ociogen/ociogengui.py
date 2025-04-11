@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
@@ -9,11 +8,14 @@ import contextlib
 import io
 import shutil
 import PyOpenColorIO as ocio
+import importlib.resources # Added for package data access
 import tkinter.font as tkFont # Added for text width measurement
 from collections import OrderedDict # For ordered roles
 from dataclasses import asdict # To convert Colorspace objects back to dicts
 from tkinter import simpledialog # For simple input dialogs
-from .ociogen import OCIOConfig, Colorspace, IncludeLoader, VALID_LUT_EXTENSIONS
+
+from .ociogen import OCIOConfig, Colorspace, VALID_LUT_EXTENSIONS
+
 
 
 
@@ -393,20 +395,20 @@ class OCIOGenGUI:
         self._toggle_theme()
 
     def _load_raw_colorspace_defs(self):
-        """Loads the raw list of dictionaries from colorspaces.yaml."""
+        """Loads the raw list of dictionaries from colorspaces.yaml using importlib.resources."""
         try:
-            cs_yaml_path = os.path.join(os.path.dirname(__file__), 'colorspaces.yaml')
-            if os.path.isfile(cs_yaml_path):
-                with open(cs_yaml_path, 'r') as f:
-                    # Use standard SafeLoader here, as we don't need IncludeLoader's path logic
-                    return yaml.safe_load(f)
-            else:
-                print(f"Error: colorspaces.yaml not found at {cs_yaml_path}")
-                return None
-        except Exception as e:
-            print(f"Error loading raw colorspace definitions: {e}")
+            # Access colorspaces.yaml relative to the 'ociogen.data' subpackage
+            cs_path_ref = importlib.resources.files('ociogen.data').joinpath('colorspaces.yaml')
+            with cs_path_ref.open('r', encoding='utf-8') as f:
+                # Use standard SafeLoader here, as we don't need IncludeLoader's path logic
+                # for this specific file (it's included *by* config_settings.yaml)
+                return yaml.safe_load(f)
+        except FileNotFoundError:
+            print("Error: colorspaces.yaml not found in package data.")
             return None
-
+        except Exception as e:
+            print(f"Error loading raw colorspace definitions from package data: {e}")
+            return None
 
     def _setup_variables(self):
         """Initialize tkinter control variables."""
@@ -660,7 +662,7 @@ class OCIOGenGUI:
         # Store the entry widget for potential binding later if needed
         self.lut_path_entry = ttk.Entry(settings_frame, textvariable=self.lut_search_path_var)
         self.lut_path_entry.grid(row=0, column=1, sticky='ew', padx=5, pady=2)
-        Tooltip(self.lut_path_entry, "The directory where the script will look for LUT files for View Transforms.\nCan be an absolute path or relative to the script location.")
+        Tooltip(self.lut_path_entry, "Directory to search for View Transform LUTs.\nRelative paths are resolved from the Current Working Directory.\nAbsolute paths are used as-is.")
         # Add select all binding (Ctrl+A / Cmd+A)
         self.lut_path_entry.bind_class("TEntry", "<Control-a>", lambda event: event.widget.select_range(0, 'end'))
         self.lut_path_entry.bind_class("TEntry", "<Command-a>", lambda event: event.widget.select_range(0, 'end')) # macOS
@@ -1121,20 +1123,22 @@ class OCIOGenGUI:
 
     def _browse_lut_path(self):
         """Open directory browser for LUT search path."""
-        script_dir = os.path.dirname(__file__)
-        # Use current value in the entry field as initial directory, falling back to script dir
+        # Use current value in the entry field as initial directory suggestion.
+        # Default to current working directory if entry is empty or invalid.
         current_path_setting = self.lut_search_path_var.get()
-        initial_dir = script_dir # Default
+        initial_dir = os.getcwd() # Default to CWD
 
-        # Try to resolve the current path setting to an existing directory
-        if os.path.isabs(current_path_setting):
-            if os.path.isdir(current_path_setting):
-                initial_dir = current_path_setting
-        else:
-            potential_path = os.path.abspath(os.path.join(script_dir, current_path_setting))
-            if os.path.isdir(potential_path):
-                initial_dir = potential_path
+        # Try to resolve the current path setting (relative to CWD or absolute)
+        potential_path = current_path_setting
+        if not os.path.isabs(potential_path):
+             potential_path = os.path.abspath(os.path.join(os.getcwd(), potential_path))
 
+        if os.path.isdir(potential_path):
+            initial_dir = potential_path
+        # If the path doesn't exist, check if its parent exists
+        elif os.path.isdir(os.path.dirname(potential_path)):
+             initial_dir = os.path.dirname(potential_path)
+             
         directory = filedialog.askdirectory(initialdir=initial_dir, title="Select LUT Search Directory")
         if directory:
             # Always use the absolute path
@@ -1158,19 +1162,17 @@ class OCIOGenGUI:
 
         search_path = self.lut_search_path_var.get()
         pattern = self.lut_pattern_var.get() # Pattern from GUI should NOT include extension
-        script_dir = os.path.dirname(__file__)
-
-        # Handle absolute vs relative search path more robustly
+        # Resolve LUT search path: absolute or relative to CWD
         if os.path.isabs(search_path):
             full_search_dir = search_path
         else:
-            # Ensure relative paths are joined correctly from the script directory
-            full_search_dir = os.path.abspath(os.path.join(script_dir, search_path))
+            # Interpret relative paths from the current working directory
+            full_search_dir = os.path.abspath(os.path.join(os.getcwd(), search_path))
 
         if not os.path.isdir(full_search_dir):
             self.status_var.set(f"LUT directory not found: {full_search_dir}")
             return
-
+        
         # --- Build Regex from Pattern (Using displaySpace) ---
         placeholders = {
             'viewName': r'(?P<viewName>.+)',
@@ -2290,10 +2292,10 @@ class OCIOGenGUI:
         processed_vt_data = [] # For LUT-based views
         explicit_mutations = [] # For mutated views present in the GUI
         skipped_entries = []
-        script_dir = os.path.dirname(__file__)
+        # Resolve LUT base path relative to CWD if not absolute
         lut_base_path = self.lut_search_path_var.get()
         if not os.path.isabs(lut_base_path):
-             lut_base_path = os.path.abspath(os.path.join(script_dir, lut_base_path))
+             lut_base_path = os.path.abspath(os.path.join(os.getcwd(), lut_base_path))
 
         print("Validating and gathering View Transform entries from GUI...")
         for item_id in self.lut_tree.get_children():
@@ -2713,7 +2715,7 @@ __all__ = [
 ]
 
 def main():
-    """Main function to run the OCIOGen GUI."""
+    """Entry point for the GUI application."""
     root = tk.Tk()
     app = OCIOGenGUI(root)
     root.mainloop()

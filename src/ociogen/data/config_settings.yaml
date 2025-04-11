@@ -129,6 +129,3 @@ active_colorspaces:
   - dci-p3d65
   - display-p3
   - rec2100-pq
-
-
-colorspaces: !include colorspaces.yaml
