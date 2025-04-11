@@ -1,47 +1,31 @@
-#!/usr/bin/env python3
 import os
 import sys
 import shutil
 import PyOpenColorIO as ocio
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
 import contextlib
 import io
 import itertools
 import yaml
 import re
-import ast
-import glob # Add glob for file searching
-import fnmatch # Add fnmatch for wildcard matching
-from collections import OrderedDict # Import OrderedDict
+from collections import OrderedDict
+from pathlib import Path
+import importlib.resources
 
-VALID_LUT_EXTENSIONS = {'.cube', '.cub', '.spi1d', '.spi3d', '.3dl', '.csp'} # Added spi1d for completeness, though maybe not strictly needed for view transforms
 
 from dataclasses import dataclass
 from inspect import getmembers, isfunction
 
-from utilities import transfer_functions
-from utilities.colorimetry import *
+from .utilities import transfer_functions
+from .utilities.colorimetry import *
+
+# TODO! Need to think more on if/how to support local config settings override
+# from .data import PACKAGE_CONFIG_SETTINGS_PATH, LOCAL_CONFIG_SETTINGS_PATH
 
 
-# Make sure we have a recent enough python version
-MIN_PYTHON = (3, 7)
-if sys.version_info < MIN_PYTHON:
-    sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
+VALID_LUT_EXTENSIONS = {'.cube', '.cub', '.spi3d', '.3dl', '.csp'}
 
 
-# https://stackoverflow.com/questions/528281/how-can-i-include-a-yaml-file-inside-another
-class IncludeLoader(yaml.SafeLoader):
-    def __init__(self, stream):
-        self._root = os.path.split(stream.name)[0]
-        super(IncludeLoader, self).__init__(stream)
-    def include(self, node):
-        filename = os.path.join(self._root, self.construct_scalar(node))
-        with open(filename, 'r') as f:
-            # When including, we expect the included file to contain the list directly
-            return yaml.load(f, IncludeLoader)
-IncludeLoader.add_constructor('!include', IncludeLoader.include)
+# IncludeLoader class removed as per refactoring plan.
 
 
 @dataclass
@@ -58,50 +42,68 @@ class Colorspace:
     forward: bool = True # forward is the TO_REFERENCE direction, otherwise FROM_REFERENCE
 
 
+
 class OCIOConfig:
-    def __init__(self, config_data=None, config_path=None, output_dir=None):
+    # Removed config_path parameter - now always loads from package data unless config_data is provided
+    def __init__(self, config_data=None, output_dir=None):
         """
         Initialize OCIOConfig.
-        Loads configuration from config_data dict, config_path file,
-        or defaults to 'config_settings.yaml' in the script's directory.
+        Loads configuration from config_data dict (e.g., from GUI)
+        or defaults to 'config_settings.yaml' bundled within the package data.
         output_dir specifies the parent directory for the generated config folder.
         """
         settings_source = None # Variable to hold the dictionary containing settings
 
         if config_data:
-            # If data is injected (from GUI), it should contain the 'settings' key directly
+            # If data is injected (e.g., from GUI), use it directly
             settings_source = config_data
-            print("Loading config from provided data (GUI)...") # Add log
+            print("Loading config from provided data...")
         else:
-            # Load from file path
-            if config_path is None:
-                config_path = os.path.join(os.path.dirname(__file__), 'config_settings.yaml')
-            print(f'Loading config from file: {config_path}')
-            if os.path.isfile(config_path):
-                with open(config_path, 'r') as f:
-                    # The loaded YAML file *will* have a top-level 'settings' key
-                    settings_source = yaml.load(f, IncludeLoader)
-            else:
-                # Handle file not found error
-                print(f"Error: Configuration file '{config_path}' not found.")
+            # Load default config_settings.yaml and colorspaces.yaml from package data
+            print("Loading default config and colorspaces from package data...")
+            settings_data = None
+            colorspace_list_data = None
+            try:
+                # Get a reference to the package's data directory
+                data_pkg_ref = importlib.resources.files('ociogen.data')
+
+                # Load config_settings.yaml
+                config_path_ref = data_pkg_ref.joinpath('config_settings.yaml')
+                with config_path_ref.open('r', encoding='utf-8') as f_settings:
+                    settings_data = yaml.safe_load(f_settings)
+
+                # Load colorspaces.yaml
+                colorspaces_path_ref = data_pkg_ref.joinpath('colorspaces.yaml')
+                with colorspaces_path_ref.open('r', encoding='utf-8') as f_colorspaces:
+                    colorspace_list_data = yaml.safe_load(f_colorspaces)
+
+            except FileNotFoundError as e:
+                print(f"Error: Configuration file not found in package data: {e.filename}")
+                sys.exit(1)
+            except Exception as e:
+                print(f"Error loading configuration from package data: {e}")
                 sys.exit(1)
 
-        # Now, extract 'settings' from the determined source
-        if settings_source:
-             self.settings = settings_source.get('settings', {}) # Get the 'settings' dict
+        # Now, extract 'settings', 'roles', etc. from the loaded settings_data
+        if settings_data:
+             self.settings = settings_data.get('settings', {}) # Get the 'settings' dict
              # Check if settings were actually found
              if not self.settings:
-                  # This could happen if the provided config_data or the loaded YAML was missing the 'settings' key
-                  print("Error: 'settings' section not found in configuration source.")
+                  print("Error: 'settings' section not found in config_settings.yaml.")
                   sys.exit(1)
-             # Extract other top-level keys (roles, colorspaces, etc.) from the same source
-             self.roles = settings_source.get('roles', {})
-             self.active_colorspaces = settings_source.get('active_colorspaces')
-             colorspace_list_data = settings_source.get('colorspaces')
+             # Extract other top-level keys from settings_data
+             self.roles = settings_data.get('roles', {})
+             self.active_colorspaces = settings_data.get('active_colorspaces')
+             # colorspace_list_data is already loaded separately above
         else:
              # This case should be handled by the file loading error check above
-             print("Error: No configuration source found (data or file).")
+             print("Error: Failed to load settings data.")
              sys.exit(1)
+
+        # Validate that colorspace_list_data was loaded
+        if colorspace_list_data is None:
+            print("Error: Failed to load colorspace data from colorspaces.yaml.")
+            sys.exit(1)
 
         # --- Validate Essential Settings Early ---
         # Check for reference_colorspace immediately after loading settings
@@ -127,10 +129,9 @@ class OCIOConfig:
 
         # --- Load Colorspace Definitions ---
         # If config_data was passed, it MUST contain the resolved 'colorspaces' list.
-        # If loaded from file, IncludeLoader should have handled the !include.
-        # colorspace_list_data = yaml_data.get('colorspaces') # Now handled above
+        # colorspace_list_data is loaded directly from colorspaces.yaml
         if not isinstance(colorspace_list_data, list):
-             print("Error: 'colorspaces' key in configuration data did not resolve to a list.")
+             print("Error: colorspaces.yaml did not resolve to a list.")
              sys.exit(1) # Exit if colorspaces aren't a list
 
         # Populate self.colorspaces from the extracted list data
@@ -584,12 +585,15 @@ class OCIOConfig:
         else:
             print("Discovering LUTs and generating View Transforms...")
             view_transform_settings = self.settings.get('view_transform_settings', {})
-            lut_search_path = view_transform_settings.get('lut_search_path', 'luts/')
+            lut_search_path_setting = view_transform_settings.get('lut_search_path', '.') # Default to CWD if not specified
             # Default shaper role used ONLY if {shaperSpace} is NOT in the filename pattern
             default_shaper_role_if_unspecified = self.roles.get('color_timing', 'color_timing')
 
-            script_dir = os.path.dirname(__file__)
-            full_search_dir = os.path.join(script_dir, lut_search_path)
+            # Resolve LUT search path: absolute or relative to CWD
+            if os.path.isabs(lut_search_path_setting):
+                full_search_dir = lut_search_path_setting
+            else:
+                full_search_dir = os.path.abspath(os.path.join(os.getcwd(), lut_search_path_setting))
             discovered_luts_info = [] # Store successfully parsed info: {'viewName':.., 'displaySpace':.., 'shaperSpace':.., 'lutFilename':.., 'originalPath':..}
 
             if not os.path.isdir(full_search_dir):
@@ -1327,9 +1331,26 @@ class OCIOConfig:
         # cfg = re.sub(r'\n\s*\n', '\n', cfg) # Keep this commented for now
         return cfg.strip() # Remove leading/trailing whitespace
 
+__all__ = [
+    "Colorspace"
+    # "IncludeLoader", # Removed
+    "OCIOConfig",
+    VALID_LUT_EXTENSIONS
+]
 
-# Usage example
+def main():
+    """Entry point for the command-line tool."""
+    print("Starting OCIO config generation...")
+    # Instantiate OCIOConfig - it will load default config from package data
+    # TODO: Add argument parsing here if CLI options are needed (e.g., specifying output dir)
+    try:
+        config = OCIOConfig() # output_dir will use default from config or ~/Desktop
+        config.create_config()
+    except Exception as e:
+        print(f"\nAn error occurred during config generation: {e}", file=sys.stderr)
+        sys.exit(1)
+
+# Keep the if __name__ == "__main__": block for direct script execution *during development*
+# But the primary entry point for the installed package is the main() function via pyproject.toml
 if __name__ == "__main__":
-    # When run as script, load default config_settings.yaml
-    config = OCIOConfig() # No args uses default path
-    config.create_config()
+    main()
