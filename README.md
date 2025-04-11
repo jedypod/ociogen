@@ -7,7 +7,7 @@
   - [Project Overview](#project-overview)
   - [Installation](#installation)
   - [Running the Software](#running-the-software)
-  - [Graphical User Interface Usage (`ociogengui.py`)](#graphical-user-interface-usage-ociogenguipy)
+  - [Graphical User Interface Usage (`ociogengui`)](#graphical-user-interface-usage-ociogengui)
     - [General Settings Tab](#general-settings-tab)
     - [Colorspaces \& Roles Tab](#colorspaces--roles-tab)
     - [View Transforms Tab](#view-transforms-tab)
@@ -19,13 +19,13 @@
       - [`active_colorspaces`](#active_colorspaces)
       - [`colorspaces`](#colorspaces)
     - [`colorspaces.yaml`](#colorspacesyaml)
-  - [Command-Line Usage (`ociogen.py`)](#command-line-usage-ociogenpy)
+  - [Command-Line Usage (`ociogencli`)](#command-line-usage-ociogencli)
 
 ---
 
 ## Project Overview
 
-**OCIOGen** is a tool designed to simplify the creation and management of OpenColorIO (OCIO) configuration files. It provides both a command-line interface (`ociogen.py`) and a graphical user interface (`ociogengui.py`) to generate OCIO configs based on user-defined colorspace definitions and LUTs. All colorimetry math is built in, so all you need to provide for each colorspace is a set of CIE xy chromaticities, a transfer function and your desired reference space. The gamut conversion matrices to or from your reference space are calculated automatically.
+**OCIOGen** is a tool designed to simplify the creation and management of OpenColorIO (OCIO) configuration files. It provides both a command-line interface (`ociogen`) and a graphical user interface (`ociogengui`) to generate OCIO configs based on user-defined colorspace definitions and LUTs. All colorimetry math is built in, so all you need to provide for each colorspace is a set of CIE xy chromaticities, a transfer function and your desired reference space. The gamut conversion matrices to or from your reference space are calculated automatically.
 
 **Key Features:**
 
@@ -43,22 +43,20 @@
 
 ## Installation
 
-This project requires Python 3.7+ and the following Python libraries:
+This project requires Python 3.7+. It is packaged using standard Python tools.
 
-*   **PyOpenColorIO:** For interacting with the OCIO library.
-*   **PyYAML:** For reading the YAML configuration files.
+**1. Create and Activate a Virtual Environment (Recommended)**
 
-You can install these dependencies using `pip` (Python's standard package installer) or Astral's `uv`.
+It's highly recommended to install `ociogen` within a virtual environment to avoid conflicts with other Python projects or system packages.
 
-**Option 1: Using `pip` and `venv` (Standard)**
-
-1.  **Create a Virtual Environment (Optional but Recommended):**
+*   **Create the environment:**
     ```bash
-    python -m venv venv
+    python -m venv .venv
     ```
+    *(You can replace `.venv` with your preferred directory name)*
 
-2.  **Activate the Virtual Environment:**
-    *   **Linux/macOS:**
+*   **Activate the environment:**
+    *   **Linux/macOS (bash/zsh):**
         ```bash
         source venv/bin/activate
         ```
@@ -70,62 +68,54 @@ You can install these dependencies using `pip` (Python's standard package instal
         ```bash
         venv\Scripts\Activate.ps1
         ```
+    Your terminal prompt should change to indicate the active environment (e.g., `(venv) your-user@host:...$`).
 
-3.  **Install Dependencies:**
+**2. Install OCIOGen**
+
+Once the virtual environment is active, you can install `ociogen` and its dependencies using `pip`.
+
+*   **Standard Installation:**
+    Navigate to the root directory of the `ociogen` project (where `pyproject.toml` is located) and run:
     ```bash
-    python3 -m pip install PyOpenColorIO PyYAML
+    pip install .
     ```
-    *(Note: Ensure `pip` corresponds to your Python 3 installation. You might need to use `pip3` on some systems.)*
+    This installs the package into your virtual environment.
 
-**Option 2: Using `uv` (Fast Alternative)**
-
-[uv](https://github.com/astral-sh/uv) is a very fast Python package installer and resolver.
-
-1.  **Install `uv`:** Follow the instructions on the [uv website](https://astral.sh/uv#installation).
-
-2.  **Create Virtual Environment and Install Dependencies:**
-    `uv` can create the environment and install packages in one step. Run this in the project's root directory:
+*   **Editable (Development) Installation:**
+    If you plan to modify the `ociogen` source code or want the installation to point directly to your local project files (useful if you don't have permissions for a standard install or for development), use the `-e` flag:
     ```bash
-    uv venv
-    uv pip install PyOpenColorIO PyYAML
+    pip install -e .
     ```
-    This creates a `.venv` directory and installs the packages into it.
+    This creates links to your source code within the environment, so any changes you make to the `.py` files are immediately reflected when you run the commands.
 
-3.  **Activate the Environment (Optional for `uv run`):**
-    You can activate the environment created by `uv` like a standard `venv`:
-    *   **Linux/macOS:** `source .venv/bin/activate`
-    *   **Windows (Cmd):** `.venv\Scripts\activate.bat`
-    *   **Windows (PowerShell):** `.venv\Scripts\Activate.ps1`
+**3. Deactivate the Virtual Environment (When Finished)**
 
-    Alternatively, you can use `uv run` to execute commands within the environment without activating it explicitly (see [Running the Software](#running-the-software)).
+When you're done working with `ociogen`, you can deactivate the environment:
+```bash
+deactivate
+```
 
 ---
 
 ## Running the Software
 
-Once dependencies are installed (using either `pip` or `uv`):
+After installing `ociogen` (and ensuring your virtual environment is active if you used one):
 
-*   **If you activated the virtual environment:**
+*   **Run the GUI:**
     ```bash
-    # Run the GUI
-    python ociogengui.py
-
-    # Run the command-line tool
-    python ociogen.py
+    ociogengui
     ```
 
-*   **If using `uv` without activating the environment:**
+*   **Run the Command-Line Tool:**
     ```bash
-    # Run the GUI
-    uv run python ociogengui.py
-
-    # Run the command-line tool
-    uv run python ociogen.py
+    ociogen
     ```
+
+The necessary dependencies (`PyOpenColorIO`, `PyYAML`) are automatically installed when you install the `ociogen` package using `pip`.
 
 ---
 
-## Graphical User Interface Usage (`ociogengui.py`)
+## Graphical User Interface Usage (`ociogengui`)
 
 The GUI provides an interactive way to configure and generate the OCIO config. It is built with tkinter, so it should work out of the box with python on your system.
 
@@ -273,7 +263,7 @@ This section defines global parameters for the generated OCIO config.
           - image: Image Formation # Category for generated view transforms
         ```
 *   `view_transform_settings` (Dictionary): Contains settings related to view transform LUT discovery.
-    *   `lut_search_path` (String): The directory path (absolute or relative to `ociogen.py`) where view transform LUTs are located.
+    *   `lut_search_path` (String): The directory path (absolute or relative to `ociogen`) where view transform LUTs are located.
         *   Example: `/path/to/luts/` or `../shared_luts`
     *   `lut_filename_pattern` (String): A pattern used to parse information from LUT filenames (excluding the extension). Use placeholders `{viewName}`, `{displaySpace}`, and optionally `{shaperSpace}`. Underscores in the matched `{viewName}` part will be replaced with spaces.
         *   Example: `"{viewName}__{shaperSpace}_to_{displaySpace}"`
@@ -308,7 +298,7 @@ This is a list of colorspace `shortname`s (must match the `shortname` field in `
     active_colorspaces:
       - bypass
       - xyz-d65
-      - aces-ap0
+      - aces
       - acescg
       # ... other shortnames
     ```
@@ -363,13 +353,10 @@ This file contains a list of colorspace definitions. Each item in the list is a 
 
 ---
 
-## Command-Line Usage (`ociogen.py`)
+## Command-Line Usage (`ociogencli`)
 
-You can generate an OCIO configuration directly from the command line by running the `ociogen.py` script.
+You can generate an OCIO configuration directly from the command line by running the `ociogencli` script.
 
-```bash
-python ociogen.py
-```
 
 When run this way:
 
@@ -380,7 +367,7 @@ When run this way:
 4.  It applies view mutations based on the `view_mutate` rules in `config_settings.yaml`.
 5.  It generates the OCIO config file and associated LUTs inside a folder specified by `config_location` and `config_name` within `config_settings.yaml`.
 
-Currently, there are no command-line arguments to override the default `config_settings.yaml` path or other settings. All configuration is done via the YAML files when using the script directly.
+Currently, there are no command-line arguments to override the default `config_settings.yaml` path or other settings. All configuration is done via the YAML files when using the script directly. (To be improved)
 
 ---
 
