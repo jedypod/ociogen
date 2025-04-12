@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
-import sys # Import sys for platform check
+import sys
 import re
 import yaml
 import contextlib
@@ -9,14 +9,12 @@ import io
 import shutil
 import PyOpenColorIO as ocio
 import importlib.resources # Added for package data access
-import tkinter.font as tkFont # Added for text width measurement
 from collections import OrderedDict # For ordered roles
-from dataclasses import asdict # To convert Colorspace objects back to dicts
-from tkinter import simpledialog # For simple input dialogs
+from dataclasses import asdict
+import tkinter.font as tkFont
+from tkinter import simpledialog
 
-from .ociogen import OCIOConfig, Colorspace, VALID_LUT_EXTENSIONS
-
-
+from .core import OCIOConfig, Colorspace, VALID_LUT_EXTENSIONS
 
 
 # --- Dark Theme Configuration ---
@@ -48,6 +46,8 @@ LIGHT_BUTTON_ACTIVE_BG = '#E5F1FB' # Very light blue
 LIGHT_DISABLED_FG = '#A0A0A0' # Gray
 LIGHT_OUTLINE = '#A0A0A0' # Gray outline/border
 LIGHT_SCROLL_TROUGH = '#E0E0E0' # Slightly darker gray for scrollbar trough
+
+
 
 def apply_dark_theme(root):
     """Configures ttk styles and root options for a dark theme."""

@@ -13,8 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ociogencli = "ociogen.ociogen:main"
-ociogengui = "ociogen.ociogengui:main"
+ociogen = "ociogen.ociogen:main"
 
 [build-system]
 requires = ["hatchling"]
