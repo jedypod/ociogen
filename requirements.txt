@@ -1,2 +1,0 @@
-PyYAML>=3.0
-opencolorio>=2.0
