@@ -6,30 +6,33 @@
   - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
   - [Installation](#installation)
+    - [**Faster Alternative Using `uv`**](#faster-alternative-using-uv)
   - [Running the Software](#running-the-software)
-  - [Graphical User Interface Usage (`ociogengui`)](#graphical-user-interface-usage-ociogengui)
+  - [Graphical User Interface Usage (`ociogen`)](#graphical-user-interface-usage-ociogen)
     - [General Settings Tab](#general-settings-tab)
     - [Colorspaces \& Roles Tab](#colorspaces--roles-tab)
     - [View Transforms Tab](#view-transforms-tab)
     - [Bottom Controls](#bottom-controls)
   - [Configuration Files (YAML)](#configuration-files-yaml)
-    - [`config_settings.yaml`](#config_settingsyaml)
+    - [`config.yaml` (formerly config\_settings.yaml)](#configyaml-formerly-config_settingsyaml)
       - [`settings`](#settings)
       - [`roles`](#roles)
       - [`active_colorspaces`](#active_colorspaces)
       - [`colorspaces`](#colorspaces)
     - [`colorspaces.yaml`](#colorspacesyaml)
-  - [Command-Line Usage (`ociogencli`)](#command-line-usage-ociogencli)
+  - [Command-Line Usage](#command-line-usage)
+    - [Generating Configs (`ociogen run`)](#generating-configs-ociogen-run)
+    - [Localizing Configuration Files (`ociogen localize`)](#localizing-configuration-files-ociogen-localize)
 
 ---
 
 ## Project Overview
 
-**OCIOGen** is a tool designed to simplify the creation and management of OpenColorIO (OCIO) configuration files. It provides both a command-line interface (`ociogen`) and a graphical user interface (`ociogengui`) to generate OCIO configs based on user-defined colorspace definitions and LUTs. All colorimetry math is built in, so all you need to provide for each colorspace is a set of CIE xy chromaticities, a transfer function and your desired reference space. The gamut conversion matrices to or from your reference space are calculated automatically.
+**OCIOGen** simplifies OpenColorIO config creation with a user-friendly GUI, flexible YAML definitions, automatic LUT discovery, and command-line generation capabilities. It provides both a graphical user interface (`ociogen`) and command-line operations (`ociogen run`, `ociogen localize`) to generate OCIO configs based on user-defined colorspace definitions and LUTs. All colorimetry math is built in, so all you need to provide for each colorspace is a set of CIE xy chromaticities, a transfer function and your desired reference space. The gamut conversion matrices to or from your reference space are calculated automatically.
 
 **Key Features:**
 
-*   **GUI for Interactive Configuration:** An intuitive interface to manage settings, select active colorspaces, configure roles, discover/edit/mutate view transforms, and generate the final config.
+*   **GUI for Interactive Configuration:** Run `ociogen` to launch an intuitive graphical user interface to manage settings, select active colorspaces, configure roles, discover/edit/mutate view transforms, and generate the final OCIO config.
 *   **Flexible Colorspace Definitions:** Easily define custom colorspaces from CIE xy chromaticities, custom transfer functions based on a python function or OCIO v2 Built-in transform, with additional attributes like category, encodings, and aliases.
 *   **OCIO v1/v2 Compatibility:** Generate configs targeting either major OCIO version.
 *   **YAML-based Configuration:** Define core settings, roles, active colorspaces, and colorspace definitions in human-readable YAML files.
@@ -37,6 +40,8 @@
 *   **View Transform Generation:** Automatically create the necessary OCIO colorspaces and transforms for discovered LUTs.
 *   **View Mutation:** Automatically generate additional view transforms for different displays based on existing LUTs and mutation rules. For example, to automatically create "sRGB Display" views from a Rec.1886 LUT.
 *   **Built-in Transform Support (OCIOv2):** Optionally use OCIOv2 built-in mathematical transforms instead of generating 1D LUTs for transfer functions (use with caution due to precision issues).
+*   **Command-Line Generation:** Use `ociogen run` to generate configs directly from the terminal using a `config.yaml` file.
+*   **Configuration Localization:** Use `ociogen localize` to easily copy the default configuration files to your current directory for customization.
 
 
 ---
@@ -79,14 +84,8 @@ Once the virtual environment is active, you can install `ociogen` and its depend
     ```bash
     pip install .
     ```
-    This installs the package into your virtual environment.
+    This installs the package into your virtual environment. If you skipped using a virtual environment in step 1 above, this same command will install the package on your system.
 
-*   **Editable (Development) Installation:**
-    If you plan to modify the `ociogen` source code or want the installation to point directly to your local project files (useful if you don't have permissions for a standard install or for development), use the `-e` flag:
-    ```bash
-    pip install -e .
-    ```
-    This creates links to your source code within the environment, so any changes you make to the `.py` files are immediately reflected when you run the commands.
 
 **3. Deactivate the Virtual Environment (When Finished)**
 
@@ -94,6 +93,20 @@ When you're done working with `ociogen`, you can deactivate the environment:
 ```bash
 deactivate
 ```
+
+### **Faster Alternative Using `uv`**
+If you grow weary of waiting for `pip install .` to complete, check out [Astral's UV](https://docs.astral.sh/uv/#installation), a blazing fast Rust-based python package manager. Here is how to accomplish the same steps using `uv` instead:
+    
+```bash
+# Create and activate the environment (uv automatically activates)
+uv venv
+source .venv/bin/activate # For linux and macos
+
+# Install ociogen
+uv pip install .
+```
+
+One caveate is that you must use a system installation of python3.7+ with `uv`, as it seems the custom compiled python versions do not support `tkinter`, python module we use for the gui.
 
 ---
 
@@ -103,23 +116,26 @@ After installing `ociogen` (and ensuring your virtual environment is active if y
 
 *   **Run the GUI:**
     ```bash
-    ociogengui
-    ```
-
-*   **Run the Command-Line Tool:**
-    ```bash
     ociogen
     ```
+    *(Note: Running `ociogen` with no arguments launches the GUI)*
+
+*   **Run Command-Line Operations:**
+    ```bash
+    ociogen run [options]
+    ociogen localize [scope]
+    ```
+    *(See [Command-Line Usage](#command-line-usage-ociogen) for details)*
 
 The necessary dependencies (`PyOpenColorIO`, `PyYAML`) are automatically installed when you install the `ociogen` package using `pip`.
 
 ---
 
-## Graphical User Interface Usage (`ociogengui`)
+## Graphical User Interface Usage (`ociogen`)
 
 The GUI provides an interactive way to configure and generate the OCIO config. It is built with tkinter, so it should work out of the box with python on your system.
 
-Run the GUI using one of the methods described in [Running the Software](#running-the-software).
+Run the GUI by executing `ociogen` with no arguments in your terminal (ensure your virtual environment is active if used).
 
 The GUI loads the default `config_settings.yaml` and `colorspaces.yaml` on startup to populate the initial values. You can then modify these settings before generating the config.
 
@@ -202,9 +218,9 @@ Located at the bottom of the main window.
 
 OCIOGen relies on two primary YAML files for its configuration: `config_settings.yaml` and `colorspaces.yaml`.
 
-### `config_settings.yaml`
+### `config.yaml` (formerly config_settings.yaml)
 
-This file contains the main settings for the config generation process, including global options, role definitions, active colorspace lists, and view transform discovery rules.
+This file (typically named `config.yaml`, though `ociogen run --config` allows specifying a different path) contains the main settings for the config generation process, including global options, role definitions, active colorspace lists, and view transform discovery rules. The `ociogen localize` command copies the default version of this file.
 
 ```yaml
 settings:
@@ -220,7 +236,7 @@ roles:
 active_colorspaces:
   # ... list of active colorspace shortnames ...
 
-colorspaces: !include colorspaces.yaml
+# colorspaces: !include colorspaces.yaml # Include tag might be used if colorspaces are separate
 ```
 
 #### `settings`
@@ -263,7 +279,7 @@ This section defines global parameters for the generated OCIO config.
           - image: Image Formation # Category for generated view transforms
         ```
 *   `view_transform_settings` (Dictionary): Contains settings related to view transform LUT discovery.
-    *   `lut_search_path` (String): The directory path (absolute or relative to `ociogen`) where view transform LUTs are located.
+    *   `lut_search_path` (String): The directory path (absolute or relative to the `config.yaml` file's location or the current working directory if not specified) where view transform LUTs are located. Supports `~` for home directory.
         *   Example: `/path/to/luts/` or `../shared_luts`
     *   `lut_filename_pattern` (String): A pattern used to parse information from LUT filenames (excluding the extension). Use placeholders `{viewName}`, `{displaySpace}`, and optionally `{shaperSpace}`. Underscores in the matched `{viewName}` part will be replaced with spaces.
         *   Example: `"{viewName}__{shaperSpace}_to_{displaySpace}"`
@@ -291,7 +307,7 @@ This section defines the standard OCIO roles and assigns a default colorspace (`
 
 #### `active_colorspaces`
 
-This is a list of colorspace `shortname`s (must match the `shortname` field in `colorspaces.yaml`). Only colorspaces whose `shortname` appears in this list will be included in the generated OCIO config. If this list is missing or empty in the YAML, *all* colorspaces defined in `colorspaces.yaml` will be considered active (this behaviour might differ slightly between CLI and GUI initial load).
+This is a list of colorspace `shortname`s (must match the `shortname` field in the `colorspaces` definitions, typically loaded from `colorspaces.yaml`). Only colorspaces whose `shortname` appears in this list will be included in the generated OCIO config. If this list is missing or empty in the YAML, *all* defined colorspaces will be considered active.
 
 *   Example:
     ```yaml
@@ -305,11 +321,23 @@ This is a list of colorspace `shortname`s (must match the `shortname` field in `
 
 #### `colorspaces`
 
-This key uses the special `!include` tag provided by the custom `IncludeLoader` to load the colorspace definitions from a separate file, typically `colorspaces.yaml`.
+This key typically uses the special `!include` tag (if using a custom YAML loader that supports it, like in the GUI's internal loading) to load the colorspace definitions from a separate file, usually `colorspaces.yaml`. When running `ociogen run`, it expects the colorspace definitions to be either directly embedded under a `colorspaces:` key in the main `config.yaml` or loaded via such an include mechanism if the YAML parser supports it. The `ociogen localize all` command copies the default `colorspaces.yaml`.
 
-*   Example:
+*   Example (using include):
     ```yaml
+    # In config.yaml
     colorspaces: !include colorspaces.yaml
+    ```
+*   Example (embedded):
+    ```yaml
+    # In config.yaml
+    colorspaces:
+      - name: "sRGB Display"
+        shortname: "srgb-display"
+        # ... other properties ...
+      - name: "ACEScg"
+        shortname: "acescg"
+        # ... other properties ...
     ```
 
 ### `colorspaces.yaml`
@@ -353,21 +381,59 @@ This file contains a list of colorspace definitions. Each item in the list is a 
 
 ---
 
-## Command-Line Usage (`ociogencli`)
+## Command-Line Usage
 
-You can generate an OCIO configuration directly from the command line by running the `ociogencli` script.
+The `ociogen` command provides subcommands for generating configurations and managing files directly from the terminal.
 
+### Generating Configs (`ociogen run`)
 
-When run this way:
+This command generates the OCIO configuration based on a YAML configuration file.
 
-1.  It automatically looks for `config_settings.yaml` in the same directory as the script.
-2.  It reads all settings, roles, active colorspaces, and includes `colorspaces.yaml`.
-3.  It performs LUT discovery based on the `view_transform_settings` in `config_settings.yaml`.
-    *   If LUT parsing fails for required components (display, shaper if needed) and the script is run interactively (with a TTY), it will prompt the user to enter the correct colorspace name or role. If run non-interactively, it will skip the problematic LUT.
-4.  It applies view mutations based on the `view_mutate` rules in `config_settings.yaml`.
-5.  It generates the OCIO config file and associated LUTs inside a folder specified by `config_location` and `config_name` within `config_settings.yaml`.
+```bash
+ociogen run [--config PATH] [--output DIR]
+```
 
-Currently, there are no command-line arguments to override the default `config_settings.yaml` path or other settings. All configuration is done via the YAML files when using the script directly. (To be improved)
+*   **Operation:**
+    1.  **Find Config:** Looks for `config.yaml` in the current working directory by default.
+    2.  **Override Config Path (Optional):** If `--config PATH` is provided, it uses the YAML file at the specified `PATH` instead.
+    3.  **Load Settings:** Reads settings, roles, active colorspaces, and colorspace definitions from the chosen YAML file. It expects colorspace definitions either embedded under a `colorspaces:` key or included via `!include colorspaces.yaml` (if the parser supports it).
+    4.  **Discover LUTs:** Performs LUT discovery based on `view_transform_settings` within the config file.
+    5.  **Apply Mutations:** Applies view mutations based on `view_mutate` rules.
+    6.  **Generate Output:** Creates the OCIO config file (`config.ocio`) and associated LUTs inside a folder.
+        *   The output folder's name is determined by `config_name` in the YAML file.
+        *   The output folder's location is determined by `config_location` in the YAML file (relative to the YAML file's directory or CWD, supports `~`).
+    7.  **Override Output Directory (Optional):** If `--output DIR` is provided, it places the generated config folder inside the specified `DIR`, overriding the `config_location` setting from the YAML file.
+
+*   **Example:**
+    ```bash
+    # Generate using config.yaml in the current directory
+    ociogen run
+
+    # Generate using a specific config file and output to a specific directory
+    ociogen run --config ../configs/my_project_config.yaml --output /mnt/ocio_configs/
+    ```
+
+### Localizing Configuration Files (`ociogen localize`)
+
+This command copies the default configuration files included with the `ociogen` package to your current working directory, allowing you to easily customize them.
+
+```bash
+ociogen localize [scope]
+```
+
+*   **`scope` (Optional):**
+    *   `config` (Default): Copies only `config.yaml`.
+    *   `all`: Copies both `config.yaml` and `colorspaces.yaml`.
+*   **Operation:** Checks if the target files already exist in the current directory. If they don't, it copies the default version(s) from the package data. It will print warnings if files already exist and skip copying them.
+
+*   **Example:**
+    ```bash
+    # Copy just the default config.yaml
+    ociogen localize
+
+    # Copy both config.yaml and colorspaces.yaml
+    ociogen localize all
+    ```
 
 ---
 

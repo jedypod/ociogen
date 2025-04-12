@@ -1,7 +1,7 @@
 [project]
 name = "ociogen"
 version = "0.2.0"
-description = "Add your description here"
+description = "OCIOGen simplifies OpenColorIO config creation with a user-friendly GUI, flexible YAML definitions, automatic LUT discovery, and command-line generation capabilities."
 readme = "README.md"
 authors = [
     { name = "Jed Smith", email = "jed.coma316@passmail.net" }
