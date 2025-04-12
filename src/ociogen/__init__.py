@@ -1,4 +1,4 @@
-# from .data import PACKAGE_CONFIG_SETTINGS_PATH, LOCAL_CONFIG_SETTINGS_PATH # Removed as likely unused externally
+# from .data import PACKAGE_CONFIG_PATH, LOCAL_CONFIG_SETTINGS_PATH # Removed as we copy config.yaml to cwd now instead of local override idea
 from .core import OCIOConfig, Colorspace, VALID_LUT_EXTENSIONS # Import shared components from core
 from .gui import OCIOGenGUI, Tooltip, apply_dark_theme, apply_light_theme # GUI components
 

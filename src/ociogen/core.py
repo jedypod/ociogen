@@ -48,7 +48,7 @@ class OCIOConfig:
         """
         settings_source = None # Variable to hold the dictionary containing settings
 
-        settings_data = None # To store data from config_settings.yaml
+        settings_data = None # To store data from config.yaml
         colorspace_list_data = None # To store data from colorspaces.yaml
 
         # --- Determine Config Settings Source ---
@@ -69,7 +69,7 @@ class OCIOConfig:
                 sys.exit(1)
         else:
             # No custom path, check CWD
-            local_config_path = Path(os.getcwd()) / 'config_settings.yaml'
+            local_config_path = Path(os.getcwd()) / 'config.yaml' # Look for config.yaml in CWD
             if local_config_path.is_file():
                 try:
                     with open(local_config_path, 'r', encoding='utf-8') as f_settings:
@@ -82,12 +82,12 @@ class OCIOConfig:
                 # Fallback to package data
                 try:
                     data_pkg_ref = importlib.resources.files('ociogen.data')
-                    config_path_ref = data_pkg_ref.joinpath('config_settings.yaml')
+                    config_path_ref = data_pkg_ref.joinpath('config.yaml')
                     with config_path_ref.open('r', encoding='utf-8') as f_settings:
                         settings_data = yaml.safe_load(f_settings)
                     config_load_source_msg = "Loading default config settings from package data."
                 except FileNotFoundError as e:
-                    print(f"Error: Default configuration file 'config_settings.yaml' not found in package data: {e.filename}")
+                    print(f"Error: Default configuration file 'config.yaml' not found in package data: {e.filename}")
                     sys.exit(1)
                 except Exception as e:
                     print(f"Error loading default config settings from package data: {e}")
@@ -114,7 +114,7 @@ class OCIOConfig:
              self.settings = settings_data.get('settings', {}) # Get the 'settings' dict
              # Check if settings were actually found
              if not self.settings:
-                  print("Error: 'settings' section not found in config_settings.yaml.")
+                  print("Error: 'settings' section not found in the configuration file.")
                   sys.exit(1)
              # Extract other top-level keys from settings_data
              self.roles = settings_data.get('roles', {})
@@ -161,7 +161,7 @@ class OCIOConfig:
         # Determine output directory
         self.output_dir = output_dir # Use provided output_dir if available
         if not self.output_dir:
-            # Fallback to config_settings.yaml if not provided directly
+            # Fallback to settings in config.yaml if not provided directly
             config_location = self.settings.get("config_location", "~/Desktop") # Default to Desktop if not in settings
             self.output_dir = os.path.expanduser(config_location)
         else:

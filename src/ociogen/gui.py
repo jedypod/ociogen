@@ -401,7 +401,7 @@ class OCIOGenGUI:
             cs_path_ref = importlib.resources.files('ociogen.data').joinpath('colorspaces.yaml')
             with cs_path_ref.open('r', encoding='utf-8') as f:
                 # Use standard SafeLoader here, as we don't need IncludeLoader's path logic
-                # for this specific file (it's included *by* config_settings.yaml)
+                # for this specific file (it's not the main config file)
                 return yaml.safe_load(f)
         except FileNotFoundError:
             print("Error: colorspaces.yaml not found in package data.")

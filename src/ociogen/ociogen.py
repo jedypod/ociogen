@@ -11,14 +11,14 @@ from .core import OCIOConfig
 
 
 def localize_configs(scope='config'):
-    """Copies default config_settings.yaml and optionally colorspaces.yaml to the CWD."""
+    """Copies default config.yaml and optionally colorspaces.yaml to the CWD."""
     print(f"Attempting to localize default configuration files (scope: {scope})...")
     data_pkg_ref = importlib.resources.files('ociogen.data')
     cwd = Path(os.getcwd())
     if scope == 'all':
-        files_to_copy = ['config_settings.yaml', 'colorspaces.yaml']
+        files_to_copy = ['config.yaml', 'colorspaces.yaml']
     elif scope == 'config':
-        files_to_copy = ['config_settings.yaml']
+        files_to_copy = ['config.yaml']
     else:
         print(f"Error: Invalid localization scope '{scope}'. Use 'config' or 'all'.")
         return # Or raise an error
@@ -26,23 +26,25 @@ def localize_configs(scope='config'):
     skipped_count = 0
 
     for filename in files_to_copy:
-        source_path_ref = data_pkg_ref.joinpath(filename)
+        source_filename = 'config.yaml' if filename == 'config.yaml' else filename
+        source_path_ref = data_pkg_ref.joinpath(source_filename)
+        # Destination path uses the target filename (e.g., config.yaml)
         dest_path = cwd / filename
 
         if not source_path_ref.is_file():
-            print(f"Warning: Default file '{filename}' not found in package data. Cannot localize.")
+            print(f"Warning: Default file '{source_filename}' not found in package data. Cannot localize.")
             continue
 
         if dest_path.exists():
-            print(f"Warning: '{filename}' already exists in the current directory. Skipping.")
+            print(f"Warning: '{dest_path.name}' already exists in the current directory. Skipping.") # Use dest_path.name
             skipped_count += 1
         else:
             try:
                 shutil.copy2(str(source_path_ref), str(dest_path)) # copy2 preserves metadata
-                print(f"Copied '{filename}' to '{dest_path}'.")
+                print(f"Copied default '{source_filename}' to '{dest_path.name}'.") # Use dest_path.name
                 copied_count += 1
             except Exception as e:
-                print(f"Error copying '{filename}' to '{dest_path}': {e}")
+                print(f"Error copying default '{source_filename}' to '{dest_path.name}': {e}") # Use dest_path.name
 
     if copied_count > 0:
         print(f"Localization complete. Copied {copied_count} file(s).")
@@ -67,18 +69,18 @@ def main():
     subparsers = parser.add_subparsers(dest='command', help='Available sub-commands')
 
     # --- Run Command ---
-    parser_run = subparsers.add_parser('run', help='Generate the OCIO config using settings from config_settings.yaml')
+    parser_run = subparsers.add_parser('run', help='Generate the OCIO config using settings from config.yaml')
     parser_run.add_argument(
         '--config',
         type=str,
         metavar='PATH',
-        help="Path to a specific config_settings.yaml file to use (overrides default search order)."
+        help="Path to a specific config.yaml file to use (overrides default search order)."
     )
     parser_run.add_argument(
         '--output',
         type=str,
         metavar='DIR',
-        help="Directory where the generated config folder will be placed (overrides config_settings.yaml)."
+        help="Directory where the generated config folder will be placed (overrides config.yaml)."
     )
 
     # --- Localize Command ---
@@ -88,7 +90,7 @@ def main():
         nargs='?', # Makes the argument optional
         choices=['config', 'all'],
         default='config', # Default value if argument is omitted
-        help="Specify which files to copy: 'config' (default: config_settings.yaml only) or 'all' (config_settings.yaml and colorspaces.yaml)."
+        help="Specify which files to copy: 'config' (default: config.yaml only) or 'all' (config.yaml and colorspaces.yaml)."
     )
 
     # --- Parse Arguments ---
