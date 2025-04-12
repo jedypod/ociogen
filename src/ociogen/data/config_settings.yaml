@@ -4,7 +4,7 @@ settings:
   # A description for the generated OCIO configuration file.
   config_description: "An OCIO config generated with ociogen."
   # The output directory where the config folder (named using config_name) and its LUTs will be placed. Supports '~' for user home directory.
-  config_location: ~/
+  config_location: .
   # Determines which major version of OCIO the config will be generated for. Valid values are 1 and 2.
   ocio_version_major: 1 
   # Use a more compressed name for the colorspaces, without spaces.
@@ -36,7 +36,7 @@ settings:
   # Settings for discovering and generating view transforms from LUTs
   view_transform_settings:
     # Relative or absolute path to the directory containing view transform LUTs
-    lut_search_path: ../luts
+    lut_search_path: .
     # Define the pattern for LUT filenames. Placeholders: {viewName}, {displaySpace}, {shaperSpace}
     # The script will discover displays/views based on LUTs matching this pattern.
     # Underscore characters will be replaced with spaces in {viewName}
