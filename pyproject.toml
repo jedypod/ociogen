@@ -9,7 +9,7 @@ authors = [
 requires-python = ">=3.7"
 dependencies = [
     "opencolorio>=2.0",
-    "pyyaml>=3.0",
+    "PyYAML>=3.11",
 ]
 
 [project.scripts]
