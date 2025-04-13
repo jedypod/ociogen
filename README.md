@@ -6,6 +6,7 @@
   - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
   - [Installation](#installation)
+  - [Local Installation](#local-installation)
     - [**Faster Alternative Using `uv`**](#faster-alternative-using-uv)
   - [Running the Software](#running-the-software)
   - [Graphical User Interface Usage (`ociogen`)](#graphical-user-interface-usage-ociogen)
@@ -48,7 +49,15 @@
 
 ## Installation
 
-This project requires Python 3.7+. It is packaged using standard Python tools.
+This project requires Python 3.7+. It is provided as [a standard Python Package on PyPy.org](https://pypi.org/project/ociogen/0.2.0/).
+
+To install `ociogen`, simply run
+```bash
+pip install ociogen
+```
+
+## Local Installation
+If you don't have network access or want to install locally in a virtual environment, here is how to accomplish that.
 
 **1. Create and Activate a Virtual Environment (Recommended)**
 
