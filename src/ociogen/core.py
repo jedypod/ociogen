@@ -38,125 +38,138 @@ class Colorspace:
 
 # --- Core Logic Class ---
 class OCIOConfig:
-    # Note: Removed config_data argument as it's GUI specific and core shouldn't depend on GUI structure
-    def __init__(self, config_settings_path=None, output_dir=None):
+    # Accept optional initial_data dictionary to override file loading
+    def __init__(self, output_dir=None, initial_data=None, config_settings_path=None):
         """
         Initialize OCIOConfig.
-        Loads configuration settings based on the provided path or defaults.
-        Loads colorspace definitions *always* from package data.
+        If initial_data (dict containing 'settings', 'roles', 'active_colorspaces', 'colorspaces')
+        is provided, it uses that data. Otherwise, it loads settings from
+        config_settings_path (or defaults) and colorspaces from package data.
         output_dir specifies the parent directory for the generated config folder.
         """
-        settings_source = None # Variable to hold the dictionary containing settings
+        settings_data = None
+        colorspace_list_data = None
+        config_load_source_msg = ""
 
-        settings_data = None # To store data from config.yaml
-        colorspace_list_data = None # To store data from colorspaces.yaml
+        if initial_data is not None:
+            # --- Load from Initial Data (e.g., from GUI) ---
+            print("Loading configuration from provided initial data...")
+            self.settings = initial_data.get('settings', {})
+            self.roles = initial_data.get('roles', {})
+            self.active_colorspaces = initial_data.get('active_colorspaces')
+            colorspace_list_data = initial_data.get('colorspaces') # Raw list
+            config_load_source_msg = "Loading configuration from provided initial data."
 
-        # --- Determine Config Settings Source ---
-        config_load_source_msg = "" # Message indicating where settings were loaded from
+            # Handle None case for active_colorspaces if initial_data didn't provide it
+            if self.active_colorspaces is None:
+                 print("Warning: 'active_colorspaces' not provided in initial data. All colorspaces will be considered active.")
+                 self.active_colorspaces = []
+            # Add checks for missing essential data from initial_data
+            if not self.settings:
+                 print("Error: 'settings' section missing in provided initial data.")
+                 sys.exit(1)
+            if colorspace_list_data is None:
+                 print("Error: 'colorspaces' section missing in provided initial data.")
+                 sys.exit(1)
 
-        if config_settings_path:
-            # Custom path provided via CLI
-            abs_config_path = Path(os.path.abspath(config_settings_path))
-            if not abs_config_path.is_file():
-                print(f"Error: Custom config file not found at '{abs_config_path}'. Exiting.")
-                sys.exit(1)
-            try:
-                with open(abs_config_path, 'r', encoding='utf-8') as f_settings:
-                    settings_data = yaml.safe_load(f_settings)
-                config_load_source_msg = f"Loading config settings from custom path: {abs_config_path}"
-            except Exception as e:
-                print(f"Error loading custom config settings from '{abs_config_path}': {e}")
-                sys.exit(1)
         else:
-            # No custom path, check CWD
-            local_config_path = Path(os.getcwd()) / 'config.yaml' # Look for config.yaml in CWD
-            if local_config_path.is_file():
+            # --- Load from File/Package Data (CLI mode) ---
+            # --- Determine Config Settings Source ---
+            if config_settings_path:
+                # Custom path provided via CLI
+                abs_config_path = Path(os.path.abspath(config_settings_path))
+                if not abs_config_path.is_file():
+                    print(f"Error: Custom config file not found at '{abs_config_path}'. Exiting.")
+                    sys.exit(1)
                 try:
-                    with open(local_config_path, 'r', encoding='utf-8') as f_settings:
+                    with open(abs_config_path, 'r', encoding='utf-8') as f_settings:
                         settings_data = yaml.safe_load(f_settings)
-                    config_load_source_msg = f"Loading config settings from local file: {local_config_path}"
+                    config_load_source_msg = f"Loading config settings from custom path: {abs_config_path}"
                 except Exception as e:
-                    print(f"Error loading local config settings from '{local_config_path}': {e}")
+                    print(f"Error loading custom config settings from '{abs_config_path}': {e}")
                     sys.exit(1)
             else:
-                # Fallback to package data
-                try:
-                    data_pkg_ref = importlib.resources.files('ociogen.data')
-                    config_path_ref = data_pkg_ref.joinpath('config.yaml')
-                    with config_path_ref.open('r', encoding='utf-8') as f_settings:
-                        settings_data = yaml.safe_load(f_settings)
-                    config_load_source_msg = "Loading default config settings from package data."
-                except FileNotFoundError as e:
-                    print(f"Error: Default configuration file 'config.yaml' not found in package data: {e.filename}")
-                    sys.exit(1)
-                except Exception as e:
-                    print(f"Error loading default config settings from package data: {e}")
-                    sys.exit(1)
+                # No custom path, check CWD
+                local_config_path = Path(os.getcwd()) / 'config.yaml' # Look for config.yaml in CWD
+                if local_config_path.is_file():
+                    try:
+                        with open(local_config_path, 'r', encoding='utf-8') as f_settings:
+                            settings_data = yaml.safe_load(f_settings)
+                        config_load_source_msg = f"Loading config settings from local file: {local_config_path}"
+                    except Exception as e:
+                        print(f"Error loading local config settings from '{local_config_path}': {e}")
+                        sys.exit(1)
+                else:
+                    # Fallback to package data
+                    try:
+                        data_pkg_ref = importlib.resources.files('ociogen.data')
+                        config_path_ref = data_pkg_ref.joinpath('config.yaml')
+                        with config_path_ref.open('r', encoding='utf-8') as f_settings:
+                            settings_data = yaml.safe_load(f_settings)
+                        config_load_source_msg = "Loading default config settings from package data."
+                    except FileNotFoundError as e:
+                        print(f"Error: Default configuration file 'config.yaml' not found in package data: {e.filename}")
+                        sys.exit(1)
+                    except Exception as e:
+                        print(f"Error loading default config settings from package data: {e}")
+                        sys.exit(1)
 
-        print(config_load_source_msg)
+            # --- Load Colorspaces (Always from Package Data when not using GUI data) ---
+            try:
+                data_pkg_ref = importlib.resources.files('ociogen.data')
+                colorspaces_path_ref = data_pkg_ref.joinpath('colorspaces.yaml')
+                with colorspaces_path_ref.open('r', encoding='utf-8') as f_colorspaces:
+                    colorspace_list_data = yaml.safe_load(f_colorspaces)
+                print("Loading colorspace definitions from package data.")
+            except FileNotFoundError as e:
+                print(f"Error: Default colorspace file 'colorspaces.yaml' not found in package data: {e.filename}")
+                sys.exit(1)
+            except Exception as e:
+                print(f"Error loading default colorspace definitions from package data: {e}")
+                sys.exit(1)
 
-        # --- Load Colorspaces (Always from Package Data) ---
-        try:
-            data_pkg_ref = importlib.resources.files('ociogen.data')
-            colorspaces_path_ref = data_pkg_ref.joinpath('colorspaces.yaml')
-            with colorspaces_path_ref.open('r', encoding='utf-8') as f_colorspaces:
-                colorspace_list_data = yaml.safe_load(f_colorspaces)
-            print("Loading colorspace definitions from package data.")
-        except FileNotFoundError as e:
-            print(f"Error: Default colorspace file 'colorspaces.yaml' not found in package data: {e.filename}")
+            # Now, extract 'settings', 'roles', etc. from the loaded settings_data
+            if settings_data:
+                 self.settings = settings_data.get('settings', {})
+                 if not self.settings: # Check if settings were actually found
+                      print("Error: 'settings' section not found in the configuration file.")
+                      sys.exit(1)
+                 self.roles = settings_data.get('roles', {})
+                 self.active_colorspaces = settings_data.get('active_colorspaces')
+                 if self.active_colorspaces is None:
+                      print("Warning: 'active_colorspaces' not defined in configuration source. All colorspaces will be considered active.")
+                      self.active_colorspaces = []
+            else:
+                 print("Error: Failed to load settings data.")
+                 sys.exit(1)
+
+        print(config_load_source_msg) # Print source message determined above
+
+        # --- Common Initialization Logic ---
+        # Validate that colorspace_list_data was loaded/provided
+        if colorspace_list_data is None:
+            print("Error: Failed to load/provide colorspace data.")
             sys.exit(1)
-        except Exception as e:
-            print(f"Error loading default colorspace definitions from package data: {e}")
-            sys.exit(1)
-
-        # Now, extract 'settings', 'roles', etc. from the loaded settings_data
-        if settings_data:
-             self.settings = settings_data.get('settings', {}) # Get the 'settings' dict
-             # Check if settings were actually found
-             if not self.settings:
-                  print("Error: 'settings' section not found in the configuration file.")
-                  sys.exit(1)
-             # Extract other top-level keys from settings_data
-             self.roles = settings_data.get('roles', {})
-             self.active_colorspaces = settings_data.get('active_colorspaces')
-             # colorspace_list_data is already loaded separately above
-        else:
-             # This case should be handled by the file loading error check above
-             print("Error: Failed to load settings data.")
+        if not isinstance(colorspace_list_data, list):
+             print("Error: Colorspace data did not resolve to a list.")
              sys.exit(1)
 
-        # Validate that colorspace_list_data was loaded
-        if colorspace_list_data is None:
-            print("Error: Failed to load colorspace data from colorspaces.yaml.")
-            sys.exit(1)
-
-        # --- Validate Essential Settings Early ---
-        # Check for reference_colorspace immediately after loading settings
+        # Validate Essential Settings (reference_colorspace in self.settings)
         ref_cs_name = self.settings.get('reference_colorspace')
         if not ref_cs_name:
-            print("Error: 'reference_colorspace' must be defined in the settings section of the configuration.")
+            print("Error: 'reference_colorspace' must be defined in the settings.")
             sys.exit(1)
-        # We will validate if this name maps to an actual colorspace later,
-        # after colorspaces are loaded.
 
+        # Initialize self.config, self.ocio_version_major
         self.config = ocio.Config()
         self.ocio_version_major = self.settings.get('ocio_version_major')
         if self.ocio_version_major is None:
             print("Warning: 'ocio_version_major' not set in settings. Defaulting to 1.")
             self.ocio_version_major = 1
 
-        if self.active_colorspaces is None:
-             print("Warning: 'active_colorspaces' not defined in configuration source. All colorspaces will be considered active.")
-             self.active_colorspaces = [] # Or handle differently if needed
-
-        # --- Load Colorspace Definitions ---
-        if not isinstance(colorspace_list_data, list):
-             print("Error: colorspaces.yaml did not resolve to a list.")
-             sys.exit(1) # Exit if colorspaces aren't a list
-
-        # Populate self.colorspaces from the extracted list data
+        # Load Colorspace Definitions (using the determined colorspace_list_data)
         self.colorspaces = list()
-        self._get_colorspaces(colorspace_list_data)
+        self._get_colorspaces(colorspace_list_data) # Process the list data
 
         # Determine output directory
         self.output_dir = output_dir # Use provided output_dir if available
@@ -170,9 +183,7 @@ class OCIOConfig:
 
         print(f"Output directory set to: {self.output_dir}")
 
-        # Get reference colorspace name (already checked for existence)
-        ref_cs_name = self.settings.get('reference_colorspace')
-        # Now, validate that the name corresponds to a loaded colorspace
+        # Validate reference_colorspace object (now that self.colorspaces is populated)
         self.reference_colorspace = self._get_colorspace_from_name(ref_cs_name)
         if not self.reference_colorspace:
             print(f"Error: Defined reference_colorspace '{ref_cs_name}' not found in the loaded colorspaces.")

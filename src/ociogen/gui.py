@@ -304,19 +304,21 @@ class OCIOGenGUI:
 
         # --- Load Initial Config ---
         try:
-            # Load default config initially to get structure and defaults
-            self.default_ocio_handler = OCIOConfig()
-            # Store initial colorspaces list for reference (raw dicts needed for re-init)
-            # We need the raw data as loaded by YAML before Colorspace object creation
+            # Load initial config state by creating an OCIOConfig instance without initial_data
+            # This forces it to load from files/package data.
+            initial_config_loader = OCIOConfig() # Loads defaults
+            self.initial_settings = initial_config_loader.settings
+            self.initial_roles = OrderedDict(initial_config_loader.roles)
+            # Store colorspace objects created by the initial loader
+            self.colorspace_objects = initial_config_loader.colorspaces[:]
+            # We also need the raw colorspace definitions for the final generation step
+            # Let's load them separately here as the loader doesn't expose the raw list directly.
             self.raw_colorspace_definitions = self._load_raw_colorspace_defs()
             if not self.raw_colorspace_definitions:
                  raise ValueError("Could not load raw colorspace definitions from colorspaces.yaml")
-            # Store initial roles in order
-            self.initial_roles = OrderedDict(self.default_ocio_handler.roles)
-            # Store colorspace objects for easy access
-            self.colorspace_objects = self.default_ocio_handler.colorspaces[:]
+
             # Note: _update_valid_cs_names and _update_filtered_lists will be called
-            # *after* Tkinter vars are set in _populate_initial_values
+            # *after* Tkinter vars are set in _populate_initial_values, using self.colorspace_objects
         except Exception as e:
             messagebox.showerror("Config Load Error", f"Failed to load initial configuration: {e}")
             master.quit()
@@ -738,9 +740,10 @@ class OCIOGenGUI:
 
     def _populate_initial_values(self):
         """Populate GUI widgets with values from loaded OCIOConfig."""
-        settings = self.default_ocio_handler.settings
+        # Use the initial settings loaded during GUI initialization
+        settings = self.initial_settings
         if not settings:
-            self.status_var.set("Error: No settings loaded from config.")
+            self.status_var.set("Error: No initial settings loaded.")
             return
 
         # --- General Settings ---
@@ -799,6 +802,7 @@ class OCIOGenGUI:
         initial_ref_name = settings.get('reference_colorspace')
         if initial_ref_name:
             # Find the display name corresponding to the initial underlying name
+            # Use self.colorspace_objects which were populated from the initial load
             initial_ref_obj = self._find_cs_by_name_or_shortname(initial_ref_name)
             if initial_ref_obj:
                  initial_display_name = self._get_display_name(initial_ref_obj)
@@ -883,7 +887,7 @@ class OCIOGenGUI:
              if cs_obj.name == name_or_shortname or cs_obj.shortname == name_or_shortname:
                  return cs_obj
         # Fallback check using the handler's method (might be slightly different if active list changes)
-        # return self.default_ocio_handler._get_colorspace_from_name(name_or_shortname)
+        # return initial_config_loader._get_colorspace_from_name(name_or_shortname) # Don't use temporary loader here
         return None
 
 
@@ -958,7 +962,7 @@ class OCIOGenGUI:
              self.ref_cs_var.set(new_selection)
         elif display_names:
              # If previous selection is lost, try setting based on initial config value
-             initial_ref_name = self.default_ocio_handler.settings.get('reference_colorspace')
+             initial_ref_name = self.initial_settings.get('reference_colorspace') # Use stored initial settings
              initial_ref_obj = self._find_cs_by_name_or_shortname(initial_ref_name)
              if initial_ref_obj and initial_ref_obj.encoding == 'scene-linear':
                  initial_display_name = self._get_display_name(initial_ref_obj)
@@ -1013,8 +1017,10 @@ class OCIOGenGUI:
             self.active_cs_listbox.selection_set(idx)
 
         # Select initial active colorspaces if listbox was just populated and nothing was selected before
-        if not selected_indices and not new_selection_indices and hasattr(self.default_ocio_handler, 'active_colorspaces'):
-            initial_active_set = set(self.default_ocio_handler.active_colorspaces or [])
+        # Use the active_colorspaces loaded during GUI initialization
+        initial_active_list = self.initial_settings.get('active_colorspaces') # Get from stored initial settings
+        if not selected_indices and not new_selection_indices and initial_active_list is not None:
+            initial_active_set = set(initial_active_list)
             for i in range(self.active_cs_listbox.size()):
                 display_name = self.active_cs_listbox.get(i)
                 # Check if the current display name OR the underlying shortname/name is in the initial set
@@ -1304,8 +1310,8 @@ class OCIOGenGUI:
         # Store existing views to avoid duplicate mutations: { (display_fullname, view_name) }
         existing_views = set(initial_lut_views.keys())
 
-        # Load mutate rules from initial settings
-        view_mutate_rules = self.default_ocio_handler.settings.get('view_mutate', {})
+        # Load mutate rules from initial settings stored in the GUI
+        view_mutate_rules = self.initial_settings.get('view_mutate', {})
         mutated_items_to_add = []
 
         for source_display_shortname, target_display_shortnames in view_mutate_rules.items():
@@ -2243,11 +2249,11 @@ class OCIOGenGUI:
                 "lut_filename_pattern": self.lut_pattern_var.get()
             },
             # Resolve reference colorspace *before* adding to settings
-            "reference_log_colorspace": self.default_ocio_handler.settings.get('reference_log_colorspace'),
+            "reference_log_colorspace": self.initial_settings.get('reference_log_colorspace'), # Use initial setting
             # Get description from Text widget (strip trailing newline)
             "config_description": self.config_description_text_widget.get("1.0", tk.END).strip() if self.config_description_text_widget else "",
             # --- Add view_mutate rules from initial load ---
-            "view_mutate": self.default_ocio_handler.settings.get('view_mutate', {})
+            "view_mutate": self.initial_settings.get('view_mutate', {}) # Use initial setting
         }
 
         # --- Validate Reference Colorspace ---
@@ -2393,7 +2399,8 @@ class OCIOGenGUI:
         try:
             print("Instantiating OCIOConfig with GUI data...")
             output_dir = self.output_dir_var.get() # Get output dir from GUI
-            ocio_generator = OCIOConfig(config_data=config_data_for_init, output_dir=output_dir)
+            # Pass the collected data using the 'initial_data' parameter
+            ocio_generator = OCIOConfig(initial_data=config_data_for_init, output_dir=output_dir)
 
             print("Calling create_config...")
             with contextlib.redirect_stdout(log_stream), contextlib.redirect_stderr(log_stream):
