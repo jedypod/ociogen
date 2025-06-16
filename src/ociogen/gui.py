@@ -2464,6 +2464,8 @@ class OCIOGenGUI:
             self.active_cs_listbox.config(background=LIGHT_WIDGET_BG, foreground=LIGHT_FG,
                                           selectbackground=LIGHT_SELECT_BG,
                                           selectforeground=LIGHT_SELECT_FG)
+        # Force an update to ensure theme changes are applied, especially on macOS.
+        self.master.update_idletasks()
 
     def _get_underlying_cs_name(self, display_name, resolve_role=True):
         """Finds the original name or shortname, or role name corresponding to a display name. More robustly handles shortname toggling."""
@@ -2700,6 +2702,10 @@ def main():
     """Entry point for the GUI application."""
     root = tk.Tk()
     app = OCIOGenGUI(root)
+    # Force the window to update before starting the main event loop.
+    # This can fix issues on some platforms (like macOS) where the window
+    # might not draw its contents correctly until the event loop is running.
+    root.update_idletasks()
     root.mainloop()
 
 if __name__ == "__main__":
