@@ -2438,31 +2438,6 @@ class OCIOGenGUI:
             messagebox.showerror("Generation Failed", f"Failed to generate OCIO configuration.\n\nDetails:\n{error_details}")
 
 
-    def _get_underlying_cs_name(self, display_name, resolve_role=True):
-        """Finds the original name or shortname, or role name corresponding to a display name."""
-        if not display_name: return None
-
-        # Check if it's a role name first (if allowed)
-        if resolve_role and display_name in self.initial_roles:
-            return display_name # Return the role name itself
-
-        # Find the corresponding Colorspace object
-        for cs_obj in self.colorspace_objects: # Use stored objects
-            if self._get_display_name(cs_obj) == display_name:
-                # Return shortname if it exists, otherwise name
-                return cs_obj.shortname if cs_obj.shortname else cs_obj.name
-
-        # Check if the input *was* the underlying name (e.g. shortname when long names are displayed)
-        for cs_obj in self.colorspace_objects:
-             if cs_obj.name == display_name or cs_obj.shortname == display_name:
-                 return cs_obj.shortname if cs_obj.shortname else cs_obj.name
-
-
-        # Don't print warning here, as it can be noisy during filtering
-        # print(f"Warning: Could not find underlying name/role for display name '{display_name}'")
-        return None # Return None if no match found
-
-
     def _toggle_theme(self):
         """Applies the selected theme (dark or light)."""
         if self.dark_mode_var.get():
