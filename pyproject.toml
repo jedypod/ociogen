@@ -1,6 +1,6 @@
 [project]
 name = "ociogen"
-version = "0.2.1"
+version = "0.2.2"
 description = "OCIOGen simplifies OpenColorIO config creation with a user-friendly GUI, flexible YAML definitions, automatic LUT discovery, and command-line generation capabilities."
 readme = "README.md"
 authors = [
