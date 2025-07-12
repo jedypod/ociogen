@@ -2700,7 +2700,22 @@ __all__ = [
 
 def main():
     """Entry point for the GUI application."""
-    root = tk.Tk()
+
+    def _initialize_tkinter() -> tk.Tk:
+        # https://rye.astral.sh/guide/faq/#tkinter-support
+        try:
+            return tk.Tk()  # Initialize Tkinter to ensure Tcl/Tk is set up
+        except tk.TclError:
+            os.environ["TCL_LIBRARY"] = sys.base_prefix + "/lib/tcl8.6"
+            os.environ["TK_LIBRARY"] = sys.base_prefix + "/lib/tk8.6"
+            try:
+                return tk.Tk()  # Try initializing again after setting the environment variables
+            except tk.TclError as e:
+                raise RuntimeError(
+                    "Failed to initialize Tkinter. Ensure Tcl/Tk is installed correctly."
+                ) from e
+
+    root = _initialize_tkinter()
     app = OCIOGenGUI(root)
     # Force the window to update before starting the main event loop.
     # This can fix issues on some platforms (like macOS) where the window
