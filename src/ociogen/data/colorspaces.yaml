@@ -146,9 +146,9 @@
   tf_builtin:
     type: LogCameraTransform
     params:
-      log_side_offset: 0.500867797955
-      log_side_slope: 0.055459048831
-      lin_side_offset: 0.00487980885981
+      log_side_offset: 0.552012656860665
+      log_side_slope: 0.0639976040320219
+      lin_side_offset: 0.00570482440424738
       # lin_side_slope: null
       lin_side_break: 0.0
       # linear_slope: null
@@ -166,9 +166,9 @@
   tf_builtin:
     type: LogCameraTransform
     params:
-      log_side_offset: 0.552012656860665
-      log_side_slope: 0.0639976040320219
-      lin_side_offset: 0.00570482440424738
+      log_side_offset: 0.500867797955
+      log_side_slope: 0.055459048831
+      lin_side_offset: 0.00487980885981
       # lin_side_slope: null
       lin_side_break: 0.0
       # linear_slope: null
